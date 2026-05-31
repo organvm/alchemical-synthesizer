@@ -2,14 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Brahma Visual Cortex</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brahma · Etz Chaim — Visual Cortex</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; }
+        html, body { margin: 0; height: 100%; background: #02030a; overflow: hidden; }
         canvas { display: block; }
+        * { font-family: "SF Mono", "JetBrains Mono", "Menlo", monospace; }
     </style>
 </head>
 <body>
+    <!-- Cosmology: data, then the rendering organs, then the orchestrator -->
+    <script src="tree/cosmology.js"></script>
+    <script src="tree/void.js"></script>
+    <script src="tree/ouroboros.js"></script>
+    <script src="tree/tree-renderer.js"></script>
+    <script src="tree/demo-stream.js"></script>
+    <script src="tree/hud.js"></script>
     <script src="sketch.js"></script>
 </body>
 </html>

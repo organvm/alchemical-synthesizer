@@ -78,7 +78,7 @@ Then recompile the class library in SC IDE (Cmd+Shift+L).
     ```bash
     cd brahma/web && npm install && npm start
     ```
-    - `http://localhost:3000` — real-time organism visualization
+    - `http://localhost:3000` — **Etz Chaim**: the recursive Tree of Life. Organisms emanate down the Lightning Flash into the ten Sephirot; an Ouroboros coils the cosmos and every illumined vessel contains the Tree again (fractal). Self-emanates a demo stream when SuperCollider is silent. Keys: `SPACE` flash · `+/-` recursion depth · `O` ouroboros · `M` multiverse · `D` demo · `H` help.
     - `http://localhost:3000/cortex` — Canvas web patching UI (module browser, drag-drop, cable routing)
     - `http://localhost:3000/golem` — Golem percussion web UI (sequencer, mixer, patchbay)
 3.  Launch **Pure Data** (optional):
