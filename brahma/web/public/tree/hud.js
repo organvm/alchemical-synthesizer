@@ -27,6 +27,52 @@ const Hud = (() => {
         pop();
     }
 
+    // The substrate selector + the four trait-axes of the tuned reality.
+    function drawSubstrate(list, active, axisVals) {
+        push();
+        textAlign(CENTER, CENTER);
+        // chips, centered along the top
+        const chipW = 118, gap = 10;
+        const totalW = list.length * chipW + (list.length - 1) * gap;
+        let x = width / 2 - totalW / 2;
+        const y = 20;
+        list.forEach(sub => {
+            const on = sub.id === active.id;
+            noStroke();
+            fill(on ? color(255, 255, 255, 26) : color(8, 10, 20, 130));
+            rect(x, y, chipW, 30, 6);
+            stroke(on ? color(255, 220, 130, 200) : color(120, 130, 200, 50));
+            strokeWeight(1); noFill();
+            rect(x, y, chipW, 30, 6);
+            noStroke();
+            fill(on ? color(255, 235, 170, 245) : color(170, 180, 220, 170));
+            textSize(12);
+            text(sub.key + "  " + sub.glyph + " " + sub.name, x + chipW / 2, y + 15);
+            x += chipW + gap;
+        });
+
+        // tagline + axis bars beneath the strip
+        noStroke();
+        fill(190, 200, 235, 180);
+        textSize(10);
+        text(active.tagline, width / 2, y + 44);
+
+        const bw = 150, bx = width / 2 - bw / 2, by = y + 58;
+        textAlign(LEFT, CENTER);
+        active.axes.forEach((ax, i) => {
+            const v = constrain(axisVals[i] || 0, 0, 1);
+            const ry = by + i * 16;
+            fill(150, 160, 205, 160);
+            textSize(9);
+            text(ax, bx, ry + 1);
+            const tx = bx + 84, tw = bw - 84;
+            noStroke();
+            fill(40, 45, 70, 180); rect(tx, ry - 3, tw, 6, 3);
+            fill(255, 220, 130, 220); rect(tx, ry - 3, tw * v, 6, 3);
+        });
+        pop();
+    }
+
     function drawStatus(state) {
         push();
         const lines = [
@@ -63,6 +109,7 @@ const Hud = (() => {
             return;
         }
         const rows = [
+            ["1–4 / T", "retune the synthesizer: Sound · Idea · Product · Cosmos"],
             ["SPACE", "summon the Lightning Flash of creation"],
             ["+ / -", "deepen / withdraw the fractal recursion"],
             ["O", "coil / release the Ouroboros"],
@@ -127,5 +174,5 @@ const Hud = (() => {
         return p === "left" ? "Severity" : p === "right" ? "Mercy" : "Mildness";
     }
 
-    return { drawTitle, drawStatus, drawHelp, drawTooltip };
+    return { drawTitle, drawSubstrate, drawStatus, drawHelp, drawTooltip };
 })();

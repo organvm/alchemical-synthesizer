@@ -24,7 +24,7 @@ const Tree = (() => {
         const map = {};
         for (const id in organisms) {
             const o = organisms[id];
-            const seat = COSMOS.seatFor(o.type);
+            const seat = Substrates.seatFor(o.type);
             // strongest (most coherent) organism wins a contested vessel
             if (!map[seat] || o.coherence > map[seat].coherence) {
                 map[seat] = Object.assign({ id }, o);
@@ -197,7 +197,7 @@ const Tree = (() => {
     }
 
     function drawSephirah(s, x, y, r, e, occ, alpha, depth) {
-        const baseCol = occ ? COSMOS.colorFor(occ.type) : s.color;
+        const baseCol = occ ? Substrates.colorFor(occ.type) : s.color;
         // blend vessel's own color with its occupant
         const col = occ
             ? [lerp(s.color[0], baseCol[0], 0.7), lerp(s.color[1], baseCol[1], 0.7), lerp(s.color[2], baseCol[2], 0.7)]

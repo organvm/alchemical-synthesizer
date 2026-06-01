@@ -136,8 +136,19 @@ function draw() {
     // --- The Tree (rendered last so picking reflects the true world) ----
     Tree.render(box, 0, 1, settings);
 
+    // --- The four trait-axes of the active substrate --------------------
+    // (rhyming with AdamKadmon's canonical four: spectral_profile,
+    //  temporal_topology, modulation_graph, performance_response)
+    const axisVals = [
+        stats.avgCoherence,
+        0.5 + 0.5 * Math.sin(now * 0.0003),
+        constrain(stats.litCount / 10, 0, 1),
+        constrain(stats.avgEntropy / 5, 0, 1)
+    ];
+
     // --- HUD -------------------------------------------------------------
     Hud.drawTitle();
+    Hud.drawSubstrate(Substrates.LIST, Substrates.active(), axisVals);
     Hud.drawStatus({
         live: !DemoStream.isActive(),
         litCount: stats.litCount,
@@ -156,7 +167,7 @@ function systemStats() {
     for (const id in organisms) {
         const o = organisms[id];
         cSum += o.coherence; eSum += o.entropy; n++;
-        seats[COSMOS.seatFor(o.type)] = true;
+        seats[Substrates.seatFor(o.type)] = true;
     }
     lit = Object.keys(seats).length;
     return {
@@ -171,6 +182,14 @@ function mouseMoved() {
     hovered = Tree.pick(mouseX, mouseY);
 }
 
+function retune() {
+    // Retuning the synthesizer to another reality: clear the prior emanation.
+    DemoStream.clear(organisms);
+    for (const id in organisms) delete organisms[id];
+    hovered = null;
+    Tree.triggerFlash();
+}
+
 function keyPressed() {
     if (key === " ") Tree.triggerFlash();
     else if (key === "+" || key === "=") settings.maxDepth = Math.min(3, settings.maxDepth + 1);
@@ -180,4 +199,6 @@ function keyPressed() {
     else if (key === "d" || key === "D") DemoStream.toggle();
     else if (key === "h" || key === "H") settings.showHelp = !settings.showHelp;
     else if (key === "s" || key === "S") saveCanvas("brahma-etz-chaim", "png");
+    else if (key === "t" || key === "T") { Substrates.cycle(1); retune(); }
+    else if ("1234".includes(key)) { if (Substrates.byKey(key)) retune(); }
 }
