@@ -192,6 +192,13 @@ This project follows the **Minimal Root Philosophy** and **Fidelity Stacking Abs
 
 See [CLAUDE.md](CLAUDE.md) for detailed architecture documentation, coding conventions, and development tasks. See also [ROADMAP.md](ROADMAP.md) for project milestones and [GEMINI.md](GEMINI.md) for additional architecture context.
 
+### Documentation Surfaces
+
+The project maintains its narrative record across **internal** and **external** surfaces:
+
+- **Logos layer** ([docs/logos/](docs/logos/)) — internal account: [telos](docs/logos/telos.md) (the dream), [pragma](docs/logos/pragma.md) (the honest state), [praxis](docs/logos/praxis.md) (the plan), [receptio](docs/logos/receptio.md) (the reception), and [alchemical I/O](docs/logos/alchemical-io.md).
+- **Domain surfaces** ([docs/surfaces/](docs/surfaces/)) — external manifestation: [academic](docs/surfaces/academic.md) (research framing) and [market](docs/surfaces/market.md) (product positioning).
+
 ---
 
 ## Contributing
