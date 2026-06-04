@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brahma Foundry — Productize the Alchemical Synthesizer</title>
+<meta name="description" content="The commercial surface of the Alchemical Synthesizer: API, MCP, ACP, dashboard, and a specimen marketplace.">
+<style>
+  :root{
+    --bg:#120a1e; --bg2:#1e0f35; --accent:#e94560; --gold:#d4a853;
+    --text:#d4d4d8; --muted:#8b8b96; --card:rgba(255,255,255,.04); --border:rgba(233,69,96,.25);
+    --fh:'Georgia','Palatino Linotype',serif; --fb:-apple-system,'Segoe UI',sans-serif; --fm:'SF Mono','Fira Code',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--fb);background:var(--bg);color:var(--text);line-height:1.6}
+  a{color:var(--gold);text-decoration:none}
+  h1,h2,h3{font-family:var(--fh);line-height:1.2}
+  .wrap{max-width:1080px;margin:0 auto;padding:2rem}
+  nav{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;border-bottom:1px solid var(--border)}
+  nav .brand{font-family:var(--fh);font-weight:700;color:#fff}
+  nav .links a{margin-left:1.25rem;font-size:.85rem;color:var(--muted)}
+  nav .links a:hover{color:var(--gold)}
+  .hero{text-align:center;padding:4.5rem 2rem 3rem}
+  .badge{display:inline-block;font-family:var(--fm);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;padding:.35rem 1rem;border:1px solid var(--accent);border-radius:20px;color:var(--accent);margin-bottom:1.5rem}
+  .hero h1{font-size:clamp(2.2rem,5vw,3.6rem);color:#fff;margin-bottom:.75rem}
+  .hero .tag{font-family:var(--fh);font-style:italic;color:var(--accent);font-size:clamp(1rem,2vw,1.3rem);margin-bottom:1rem}
+  .hero p{max-width:620px;margin:0 auto 2rem;color:var(--muted)}
+  .cta{display:inline-block;background:var(--accent);color:#fff;padding:.8rem 1.6rem;border-radius:8px;font-weight:600;margin:.25rem}
+  .cta.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+  .section{padding:3rem 0;border-top:1px solid var(--border)}
+  .section h2{text-align:center;margin-bottom:.5rem;color:#fff}
+  .section .sub{text-align:center;color:var(--muted);margin-bottom:2rem;font-size:.95rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem}
+  .plan{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;display:flex;flex-direction:column}
+  .plan.featured{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+  .plan h3{color:var(--accent);margin-bottom:.25rem}
+  .plan.featured h3{color:var(--gold)}
+  .plan .price{font-family:var(--fm);font-size:1.8rem;color:#fff;margin:.5rem 0}
+  .plan .price span{font-size:.8rem;color:var(--muted)}
+  .plan ul{list-style:none;margin:1rem 0;flex:1}
+  .plan li{font-size:.85rem;color:var(--text);padding:.3rem 0;border-bottom:1px dashed rgba(255,255,255,.06)}
+  .plan li::before{content:"◆ ";color:var(--gold);font-size:.7rem}
+  .plan button{margin-top:1rem;background:var(--accent);color:#fff;border:0;padding:.7rem;border-radius:8px;cursor:pointer;font-weight:600}
+  .plan.featured button{background:var(--gold);color:#120a1e}
+  .surfaces{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem}
+  .surf{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;font-size:.85rem}
+  .surf code{font-family:var(--fm);color:var(--gold);font-size:.75rem}
+  .wait{max-width:480px;margin:0 auto;text-align:center}
+  .wait input{width:100%;padding:.75rem;border-radius:8px;border:1px solid var(--border);background:#0d0716;color:var(--text);margin:.4rem 0;font-family:var(--fm)}
+  .wait button{background:var(--gold);color:#120a1e;border:0;padding:.75rem 1.5rem;border-radius:8px;cursor:pointer;font-weight:600}
+  .msg{font-size:.85rem;margin-top:.75rem;min-height:1.2em}
+  footer{text-align:center;padding:2rem;color:var(--muted);font-size:.8rem;border-top:1px solid var(--border)}
+  dialog{background:var(--bg2);color:var(--text);border:1px solid var(--gold);border-radius:12px;padding:1.5rem;max-width:380px}
+  dialog input{width:100%;padding:.6rem;margin:.3rem 0;border-radius:6px;border:1px solid var(--border);background:#0d0716;color:var(--text);font-family:var(--fm)}
+  dialog button{padding:.6rem 1rem;border:0;border-radius:6px;cursor:pointer}
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand">⚗ Brahma Foundry</div>
+  <div class="links">
+    <a href="#plans">Pricing</a>
+    <a href="#surfaces">Surfaces</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/api/v1">API</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="badge">ORGAN II · Poiesis · Productization Layer</div>
+  <h1>Sell what the instrument becomes.</h1>
+  <div class="tag">The Alchemical Synthesizer, as a product.</div>
+  <p>The Brahma engine absorbs and re-expresses sonic identity. The Foundry wraps it in everything a business needs: a dashboard, a metered REST API, an MCP server, ACP agent interop, and a marketplace for the specimens it renders.</p>
+  <a class="cta" href="#plans">Start free</a>
+  <a class="cta ghost" href="/dashboard">Open dashboard</a>
+</header>
+
+<div class="wrap">
+  <section class="section" id="plans">
+    <h2>Plans</h2>
+    <div class="sub">Start free. Upgrade as the instrument earns. Cancel anytime.</div>
+    <div class="grid" id="plans-grid"><p class="sub">Loading plans…</p></div>
+  </section>
+
+  <section class="section" id="surfaces">
+    <h2>Every surface, one engine</h2>
+    <div class="sub">The capability core is presented identically across protocols — the protocol is a skin, the capability is the body.</div>
+    <div class="surfaces">
+      <div class="surf"><strong>Dashboard</strong><br><code>/dashboard</code><br>Telemetry, keys, usage, renders.</div>
+      <div class="surf"><strong>REST API</strong><br><code>/api/v1</code><br>Metered, keyed, OpenAPI-documented.</div>
+      <div class="surf"><strong>MCP server</strong><br><code>/mcp</code><br>Tools for any MCP agent.</div>
+      <div class="surf"><strong>ACP — comm</strong><br><code>/acp/runs</code><br>Agent-to-agent interop.</div>
+      <div class="surf"><strong>ACP — client</strong><br><code>/acp/jsonrpc</code><br>Editor/agent clients + stdio.</div>
+      <div class="surf"><strong>Marketplace</strong><br><code>/marketplace</code><br>Sell rendered specimens.</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Join the waitlist</h2>
+    <div class="sub">For the hosted Foundry and early marketplace access.</div>
+    <div class="wait">
+      <input id="wl-email" type="email" placeholder="you@studio.com" />
+      <input id="wl-interest" type="text" placeholder="What would you build? (optional)" />
+      <button onclick="joinWaitlist()">Request access</button>
+      <div class="msg" id="wl-msg"></div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  Brahma Foundry · Part of the Alchemical Synthesizer · <a href="/dashboard">Dashboard</a> · <a href="/api/v1/openapi.json">OpenAPI</a>
+  <br><span style="opacity:.6">Honest seam: audio is produced by a live SuperCollider engine; cloud renders are flagged <code>simulated</code> until an engine is attached.</span>
+</footer>
+
+<dialog id="checkout-dialog">
+  <h3 style="color:var(--gold);margin-bottom:.5rem">Checkout — <span id="ck-plan"></span></h3>
+  <p style="font-size:.85rem;color:var(--muted)">Enter your email to start checkout.</p>
+  <input id="ck-email" type="email" placeholder="you@studio.com" />
+  <div style="display:flex;gap:.5rem;margin-top:.5rem">
+    <button style="background:var(--gold);color:#120a1e;flex:1" onclick="doCheckout()">Continue</button>
+    <button style="background:transparent;border:1px solid var(--border);color:var(--text)" onclick="document.getElementById('checkout-dialog').close()">Cancel</button>
+  </div>
+  <div class="msg" id="ck-msg"></div>
+</dialog>
+
+<script>
+const $ = (s) => document.querySelector(s);
+let chosenPlan = null;
+
+async function loadPlans(){
+  const res = await fetch('/api/v1/plans').then(r=>r.json());
+  const grid = $('#plans-grid'); grid.innerHTML='';
+  for (const p of res.data){
+    const featured = p.id === 'creator';
+    const priceLabel = p.contactSales ? 'Contact' : (p.priceCents===0 ? 'Free' : '$'+(p.priceCents/100).toFixed(0));
+    const el = document.createElement('div');
+    el.className = 'plan' + (featured ? ' featured' : '');
+    el.innerHTML = `
+      <h3>${p.name}</h3>
+      <div class="price">${priceLabel}${p.priceCents>0&&!p.contactSales?'<span>/mo</span>':''}</div>
+      <ul>${p.features.map(f=>`<li>${f}</li>`).join('')}</ul>
+      <button>${p.id==='free'?'Start free':(p.contactSales?'Contact sales':'Choose '+p.name)}</button>`;
+    el.querySelector('button').onclick = () => choosePlan(p);
+    grid.appendChild(el);
+  }
+}
+
+function choosePlan(p){
+  if (p.id === 'free'){ location.href='/dashboard?signup=1'; return; }
+  if (p.contactSales){ location.href='mailto:sales@brahma.studio?subject=Foundry%20self-host%20license'; return; }
+  chosenPlan = p.id;
+  $('#ck-plan').textContent = p.name;
+  $('#ck-msg').textContent = '';
+  $('#checkout-dialog').showModal();
+}
+
+async function doCheckout(){
+  const email = $('#ck-email').value.trim();
+  if (!email.includes('@')){ $('#ck-msg').textContent='Enter a valid email.'; return; }
+  $('#ck-msg').textContent='Starting checkout…';
+  const res = await fetch('/api/v1/billing/checkout/plan',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email,plan:chosenPlan})}).then(r=>r.json());
+  if (res.ok && res.data.checkoutUrl){ location.href = res.data.checkoutUrl; }
+  else { $('#ck-msg').textContent = res.error || 'Checkout failed.'; }
+}
+
+async function joinWaitlist(){
+  const email = $('#wl-email').value.trim();
+  const interest = $('#wl-interest').value.trim();
+  const msg = $('#wl-msg');
+  if (!email.includes('@')){ msg.style.color='#e94560'; msg.textContent='Enter a valid email.'; return; }
+  const res = await fetch('/api/v1/waitlist',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email,interest})}).then(r=>r.json());
+  if (res.ok){ msg.style.color='#d4a853'; msg.textContent='You\\'re on the list. We\\'ll be in touch.'; }
+  else { msg.style.color='#e94560'; msg.textContent=res.error||'Something went wrong.'; }
+}
+
+loadPlans();
+</script>
+</body>
+</html>
