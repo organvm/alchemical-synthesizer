@@ -62,6 +62,9 @@ function connectWebSocket() {
 // OSC args arrive as [{type,value}, ...] (osc.js metadata mode).
 function handleOsc(msg) {
     if (msg.address === "/brahma/organism/update") {
+        // Live engine speaks: on the handoff, purge any synthetic demo
+        // organisms so real + demo streams never co-mingle in the counts.
+        if (DemoStream.isActive()) DemoStream.clear(organisms);
         const id = msg.args[0].value;
         emitOrganism(id, msg.args[1].value, msg.args[2].value, msg.args[3].value);
         DemoStream.notifyLive();
@@ -120,7 +123,8 @@ function draw() {
                 rotate(sgn * branch * i);
                 scale(1 - i * 0.04);
                 translate(-center.x, -center.y);
-                Tree.render(box, 0, 0.16 / i, ghostSettings);
+                // base alpha on p5's 0–255 RGB scale (faint parallel worlds)
+                Tree.render(box, 0, 40 / i, ghostSettings);
                 pop();
             });
         }
@@ -134,7 +138,9 @@ function draw() {
     }
 
     // --- The Tree (rendered last so picking reflects the true world) ----
-    Tree.render(box, 0, 1, settings);
+    // Base alpha is on p5's default 0–255 RGB scale; the renderer's internal
+    // multipliers (alpha * 0.04 … 1.0) then span the full ~10–255 range.
+    Tree.render(box, 0, 255, settings);
 
     // --- The four trait-axes of the active substrate --------------------
     // (rhyming with AdamKadmon's canonical four: spectral_profile,
