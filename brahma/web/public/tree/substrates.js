@@ -37,7 +37,8 @@ const Substrates = (() => {
                 { type: "Subtractive",  seat: "gevurah", color: [100, 200, 255] },
                 { type: "FM",           seat: "chokmah", color: [255, 100, 200] },
                 { type: "Vector",       seat: "tiferet", color: [100, 180, 255] },
-                { type: "Physical",     seat: "malkuth", color: [200, 150, 100] }
+                { type: "Physical",     seat: "malkuth", color: [200, 150, 100] },
+                { type: "Ableton",      seat: "hod",     color: [80, 120, 200] }
             ]
         },
         {

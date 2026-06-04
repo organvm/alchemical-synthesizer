@@ -12,6 +12,7 @@ The **Alchemical Synthesizer** (Brahma Meta-Rack) is a modular synthesis organis
 - **Pure Data** (`brahma/pd/`): Performance UI, faceplate abstractions, OSC control surface, visual patching canvas (12 patches: 8 core + 4 canvas/)
 - **Node.js + p5.js** (`brahma/web/`): Visual Cortex organism viz, Canvas patching UI (`/cortex`), Golem percussion UI (`/golem`)
 - **Python** (`tools/`): Audio specimen validation utilities
+- **Ableton Extension** (`brahma/ableton/`): Node.js/JavaScript Live Extension (Extensions SDK, Live 12.4.5+) that absorbs a Live Set into the rack over OSC
 - **OSC**: Bidirectional glue between all layers
 
 ## Communication Architecture (Critical)
@@ -116,6 +117,7 @@ After installing, recompile the class library (Cmd+Shift+L in SC IDE).
 18. `26_*` — Interaction & controllers (MIDI controllers, sensors)
 19. `27_*` — Generative systems (Lorenz, Markov, Cellular Automata, chaos attractors + generative sequencers)
 20. `28_*` — Audio management (monitoring, recording, presets, sync)
+21. `29_*` — Ableton Bridge (Live Set absorption via the Extensions SDK; transport sync + `Ableton` organism, entity 1003)
 
 **Critical**: The IMMUNE governor is deployed as the final node in the `\rr` group at the end of `loader.scd`. All loads occur inside `s.doWhenBooted` to prevent boot race conditions.
 

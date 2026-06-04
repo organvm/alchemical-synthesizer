@@ -126,7 +126,10 @@ s.doWhenBooted({
     (root +/+ "28_audio_presets.scd").load;
     (root +/+ "28_audio_sync.scd").load;
 
-    // === 29: Deploy IMMUNE Governor (must be last in signal chain) ===
+    // === 29: Ableton Bridge (Live Set absorption via Extensions SDK) ===
+    (root +/+ "29_ableton_bridge.scd").load;
+
+    // === 30: Deploy IMMUNE Governor (must be last in signal chain) ===
     // Stereo IMMUNE on hardware outputs - final safety net
     Synth(\immune_governor, [\inBus, 0, \outBus, 0, \threshold, 0.9], ~sc_grp[\rr], \addToTail);
     Synth(\immune_governor, [\inBus, 1, \outBus, 1, \threshold, 0.9], ~sc_grp[\rr], \addToTail);

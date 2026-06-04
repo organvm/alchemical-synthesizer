@@ -143,6 +143,7 @@ Then recompile the class library in SC IDE (Cmd+Shift+L).
 - **Recording**: Multi-track capture, punch-in/out, bounce, WAV export
 - **Visual Cortex**: Real-time browser visualization via OSC-to-WebSocket bridge
 - **PD Bridge**: Bidirectional SC↔PD communication via OSC (ports 57120/57121)
+- **Ableton Bridge**: Live Extension (Extensions SDK, Live 12.4.5+) that absorbs a Live Set as a donor identity — transport sync + the `Ableton` organism (`brahma/ableton/`)
 
 ---
 
@@ -193,6 +194,7 @@ licensing → specimen marketplace → accounts/SaaS. See
 - **Pure Data** (`brahma/pd/`): Performance UI and visual patching, 12 patches (8 core + 4 canvas abstractions)
 - **Node.js + p5.js** (`brahma/web/`): Visual Cortex organism viz, Canvas patching UI, Golem percussion UI (~5,500 LOC)
 - **Python** (`tools/`): Audio specimen validation
+- **Ableton Extension** (`brahma/ableton/`): Node.js/JavaScript Live Extension that streams a Live Set into the rack over OSC
 - **OSC**: Bidirectional glue (ports 57120, 57121, 57122)
 
 ---

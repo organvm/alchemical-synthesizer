@@ -1,0 +1,31 @@
+{
+  "name": "brahma-bridge",
+  "version": "0.1.0",
+  "description": "Ableton Live Extension that absorbs a Live Set into the Brahma Meta-Rack as a donor identity and syncs transport over OSC.",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node test/smoke.js",
+    "dev": "ableton-extension dev .",
+    "build": "ableton-extension build .",
+    "package": "ableton-extension package ."
+  },
+  "keywords": [
+    "ableton",
+    "ableton-live",
+    "extension",
+    "osc",
+    "supercollider",
+    "brahma"
+  ],
+  "license": "MIT",
+  "//dependencies": "The Extensions SDK packages ship as local tarballs in the Live 12.4.5 beta and are not on npm. Drop them in vendor/ and uncomment.",
+  "dependencies": {},
+  "optionalDependencies": {
+    "@ableton-extensions/sdk": "file:vendor/ableton-extensions-sdk.tgz",
+    "@ableton-extensions/cli": "file:vendor/ableton-extensions-cli.tgz"
+  }
+}

@@ -11,7 +11,7 @@ const OSC_SEND_PORT = 57120; // Sending to SC
 const ALLOWED_NAMESPACES = [
     "/golem/", "/brahma/", "/chronos/", "/daemon/",
     "/moirai/", "/genesis/", "/arbor/", "/serpens/",
-    "/scriptorium/"
+    "/scriptorium/", "/ableton/"
 ];
 
 // Module registry cache (populated from SC broadcasts)
