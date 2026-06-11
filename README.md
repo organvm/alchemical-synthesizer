@@ -160,6 +160,33 @@ The **Web Canvas** provides a Max/MSP-style module browser with drag-drop patchi
 
 ---
 
+## Productization — The Foundry
+
+The [`product/`](product/) directory is the commercial surface of the engine: a
+single Node service that turns Brahma into a runnable, sellable, agent-drivable
+product. It runs with or without a live SuperCollider engine (cloud renders are
+flagged `simulated`).
+
+```bash
+cd product && npm install && npm run seed && npm start
+# → http://localhost:4000/pricing   (dashboard at /dashboard)
+npm run smoke   # end-to-end test across every surface
+```
+
+| Surface | Route | Purpose |
+| :--- | :--- | :--- |
+| **Dashboard UI** | `/dashboard` | Telemetry, render, catalog, marketplace, API keys, usage |
+| **Pricing / waitlist** | `/pricing` | Plans + Stripe(-stub) checkout |
+| **REST API** | `/api/v1` | Metered, key-gated, OpenAPI |
+| **MCP server** | `/mcp` | JSON-RPC tools for any MCP agent |
+| **ACP (both)** | `/acp/runs` · `/acp/jsonrpc` | Agent Communication + Agent Client protocols |
+
+Monetization is layered in logical order — free acquisition → API metering +
+licensing → specimen marketplace → accounts/SaaS. See
+[`product/README.md`](product/README.md).
+
+---
+
 ## Technology Stack
 
 - **SuperCollider** (`brahma/sc/`): DSP engine, ~20,000 LOC across 60+ `.scd` files and 6 `.sc` classes
@@ -191,6 +218,13 @@ This project follows the **Minimal Root Philosophy** and **Fidelity Stacking Abs
 - **Ontology**: Adam Kadmon (`brahma/sc/AdamKadmon.sc`)
 
 See [CLAUDE.md](CLAUDE.md) for detailed architecture documentation, coding conventions, and development tasks. See also [ROADMAP.md](ROADMAP.md) for project milestones and [GEMINI.md](GEMINI.md) for additional architecture context.
+
+### Documentation Surfaces
+
+The project maintains its narrative record across **internal** and **external** surfaces:
+
+- **Logos layer** ([docs/logos/](docs/logos/)) — internal account: [telos](docs/logos/telos.md) (the dream), [pragma](docs/logos/pragma.md) (the honest state), [praxis](docs/logos/praxis.md) (the plan), [receptio](docs/logos/receptio.md) (the reception), and [alchemical I/O](docs/logos/alchemical-io.md).
+- **Domain surfaces** ([docs/surfaces/](docs/surfaces/)) — external manifestation: [academic](docs/surfaces/academic.md) (research framing) and [market](docs/surfaces/market.md) (product positioning).
 
 ---
 

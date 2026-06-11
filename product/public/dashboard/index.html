@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brahma Foundry — Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">⚗ Brahma Foundry</div>
+  <nav class="tabs">
+    <button data-tab="overview" class="active">Overview</button>
+    <button data-tab="render">Render</button>
+    <button data-tab="catalog">Catalog</button>
+    <button data-tab="marketplace">Marketplace</button>
+    <button data-tab="surfaces">API · MCP · ACP</button>
+    <button data-tab="account">Account</button>
+  </nav>
+  <div class="who" id="who"><a href="#" id="auth-link">Sign in</a></div>
+</header>
+
+<main>
+  <!-- OVERVIEW -->
+  <section id="overview" class="panel active">
+    <div class="cards">
+      <div class="card"><div class="k">Engine</div><div class="v" id="ov-engine">—</div></div>
+      <div class="card"><div class="k">Plan</div><div class="v" id="ov-plan">—</div></div>
+      <div class="card"><div class="k">Usage this month</div><div class="v" id="ov-usage">—</div></div>
+      <div class="card"><div class="k">Live organisms</div><div class="v" id="ov-orgs">0</div></div>
+    </div>
+    <h3>Live organism telemetry</h3>
+    <canvas id="telemetry" width="1000" height="260"></canvas>
+    <p class="hint" id="ov-hint"></p>
+  </section>
+
+  <!-- RENDER -->
+  <section id="render" class="panel">
+    <h3>Render a specimen</h3>
+    <p class="hint">Metered against your API key. Audio is produced by a live engine; cloud renders are flagged <code>simulated</code>.</p>
+    <div class="form-row">
+      <label>Module <select id="rn-module"></select></label>
+      <label>Title <input id="rn-title" placeholder="optional"></label>
+      <label>Duration (s) <input id="rn-dur" type="number" value="4" min="1" max="30"></label>
+      <button id="rn-go" class="primary">Render</button>
+    </div>
+    <pre id="rn-out" class="out"></pre>
+  </section>
+
+  <!-- CATALOG -->
+  <section id="catalog" class="panel">
+    <h3>Module catalog</h3>
+    <input id="cat-q" class="search" placeholder="Search modules…">
+    <div id="cat-grid" class="module-grid"></div>
+  </section>
+
+  <!-- MARKETPLACE -->
+  <section id="marketplace" class="panel">
+    <h3>Specimen marketplace</h3>
+    <p class="hint">Rendered audio identities, for sale. Creators on paid plans keep 85%.</p>
+    <div id="mk-grid" class="module-grid"></div>
+  </section>
+
+  <!-- SURFACES -->
+  <section id="surfaces" class="panel">
+    <h3>Agent &amp; developer surfaces</h3>
+    <p class="hint">The same capability core, four ways. Authenticate with <code>Authorization: Bearer &lt;your key&gt;</code>.</p>
+    <div class="surf-doc">
+      <h4>REST API</h4>
+      <pre class="out">curl -s $ORIGIN/api/v1/modules | jq
+curl -s -X POST $ORIGIN/api/v1/render \
+  -H "Authorization: Bearer $KEY" -H "content-type: application/json" \
+  -d '{"module":"Azoth"}'</pre>
+      <h4>MCP (Model Context Protocol)</h4>
+      <pre class="out">curl -s -X POST $ORIGIN/mcp -H "content-type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+# add Authorization: Bearer $KEY for costed tools (render_specimen)</pre>
+      <h4>ACP — Agent Communication Protocol</h4>
+      <pre class="out">curl -s -X POST $ORIGIN/acp/runs -H "content-type: application/json" \
+  -d '{"agent_name":"brahma","input":[{"parts":[{"content":"render from Nebula"}]}]}'</pre>
+      <h4>ACP — Agent Client Protocol</h4>
+      <pre class="out">curl -s -X POST $ORIGIN/acp/jsonrpc -H "content-type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"session/prompt","params":{"prompt":"list modules"}}'
+# native stdio transport:  node bin/acp-stdio.js</pre>
+    </div>
+  </section>
+
+  <!-- ACCOUNT -->
+  <section id="account" class="panel">
+    <h3>Account</h3>
+    <div id="acct-auth">
+      <div class="form-row">
+        <label>Email <input id="ac-email" type="email"></label>
+        <label>Password <input id="ac-pass" type="password"></label>
+        <button id="ac-signup" class="primary">Sign up</button>
+        <button id="ac-login">Sign in</button>
+      </div>
+      <p class="msg" id="ac-msg"></p>
+    </div>
+    <div id="acct-body" style="display:none">
+      <div class="cards">
+        <div class="card"><div class="k">Plan</div><div class="v" id="ac-plan">—</div></div>
+        <div class="card"><div class="k">Usage</div><div class="v" id="ac-usage">—</div></div>
+        <div class="card"><div class="k">Upgrade</div><div class="v"><a href="/pricing">View plans →</a></div></div>
+      </div>
+      <h4>API keys</h4>
+      <button id="ac-newkey">+ New key</button>
+      <table class="keys"><thead><tr><th>Label</th><th>Key</th><th>Plan</th><th>Status</th></tr></thead><tbody id="ac-keys"></tbody></table>
+      <p class="hint">Your full key is shown once at creation — store it safely.</p>
+      <pre id="ac-newkey-out" class="out" style="display:none"></pre>
+    </div>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
