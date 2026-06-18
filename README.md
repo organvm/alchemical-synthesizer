@@ -49,9 +49,36 @@ graph LR
 - **Node.js** (v18+) — optional, for Visual Cortex web visualization
 
 ### Installation
+
+**From a release** (recommended) — each tagged release ships a built bundle
+(`.tar.gz` / `.zip`) with checksums, attached automatically by the release
+pipeline:
+```bash
+# Download alchemical-synthesizer-<version>.tar.gz from the Releases page, then:
+tar -xzf alchemical-synthesizer-*.tar.gz
+cd alchemical-synthesizer-*/
+sha256sum -c SHA256SUMS.txt      # optional: verify integrity
+cat BUILD_MANIFEST.txt           # version, commit, component counts
+```
+
+**From source:**
 ```bash
 git clone https://github.com/4444J99/alchemical-synthesizer.git
 cd alchemical-synthesizer
+```
+
+### Smoke Test (verify it runs)
+
+One command checks that the rack is installable and runnable — no full
+SuperCollider / Pd / Live setup required (it validates structure, the Ableton
+extension, the Visual Cortex web endpoint, and the audio validator):
+```bash
+make smoke          # or: bash tools/smoke.sh
+```
+This is the same "shipped-test" run in CI on every push. To build the
+distributable artifacts locally:
+```bash
+make dist           # -> dist/alchemical-synthesizer-<version>.{tar.gz,zip} + SHA256SUMS.txt
 ```
 
 ### SuperCollider Class Files

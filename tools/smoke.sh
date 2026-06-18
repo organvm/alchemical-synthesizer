@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+#
+# smoke.sh — the user smoke path for the Alchemical Synthesizer.
+#
+# Verifies the rack is installable and runnable without a full SuperCollider /
+# Pure Data / Ableton Live setup. Used both as a one-command user check
+# (`make smoke`) and as the CI "shipped-test" (.github/workflows/ci.yml).
+#
+# Checks, in order:
+#   1. Structure    — key entry points present, SynthDef file count sane
+#   2. Extension    — Ableton "Brahma Bridge" zero-dependency smoke test (node)
+#   3. JS syntax    — Visual Cortex server + sketch parse cleanly (node --check)
+#   4. Validator    — Python audio validator accepts a generated test tone
+#   5. Web endpoint — Visual Cortex boots and serves HTTP 200 (needs npm deps)
+#
+# Exit code is non-zero if any *required* check fails. The web endpoint check
+# is skipped (not failed) when dependencies can't be installed offline, unless
+# --strict is passed.
+#
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+STRICT=0
+[ "${1:-}" = "--strict" ] && STRICT=1
+
+PASS=0; FAIL=0; SKIP=0
+ok()   { echo "  PASS  $1"; PASS=$((PASS+1)); }
+bad()  { echo "  FAIL  $1"; FAIL=$((FAIL+1)); }
+skip() { echo "  SKIP  $1"; SKIP=$((SKIP+1)); }
+
+echo "=== [1/5] Structure ==="
+req_files=(
+  "brahma/sc/loader.scd"
+  "brahma/web/server.js"
+  "brahma/ableton/src/index.js"
+  "tools/validate_audio.py"
+  "README.md"
+)
+for f in "${req_files[@]}"; do
+  [ -f "$f" ] && ok "exists: $f" || bad "missing: $f"
+done
+scd_count="$(find brahma/sc -name '*.scd' | wc -l | tr -d ' ')"
+if [ "$scd_count" -ge 60 ]; then ok "SynthDef files: ${scd_count} (>= 60)"; else bad "SynthDef files: ${scd_count} (< 60)"; fi
+
+echo "=== [2/5] Ableton extension smoke (node) ==="
+if command -v node >/dev/null 2>&1; then
+  if node brahma/ableton/test/smoke.js >/tmp/brahma_ext_smoke.log 2>&1; then
+    ok "brahma/ableton/test/smoke.js"
+  else
+    bad "brahma/ableton/test/smoke.js (see /tmp/brahma_ext_smoke.log)"; tail -5 /tmp/brahma_ext_smoke.log
+  fi
+else
+  skip "node not installed — extension smoke"
+fi
+
+echo "=== [3/5] JS syntax (node --check) ==="
+if command -v node >/dev/null 2>&1; then
+  for js in brahma/web/server.js brahma/web/public/sketch.js; do
+    if node --check "$js" >/dev/null 2>&1; then ok "node --check $js"; else bad "node --check $js"; fi
+  done
+else
+  skip "node not installed — JS syntax"
+fi
+
+echo "=== [4/5] Python audio validator ==="
+if command -v python3 >/dev/null 2>&1; then
+  TONE="$(mktemp -d)/test_tone.wav"
+  if python3 tools/gen_test_tone.py "$TONE" >/dev/null 2>&1 \
+     && python3 tools/validate_audio.py "$TONE" >/tmp/brahma_validator.log 2>&1; then
+    ok "validate_audio.py accepts generated tone"
+  else
+    bad "validate_audio.py (see /tmp/brahma_validator.log)"; tail -8 /tmp/brahma_validator.log
+  fi
+  rm -f "$TONE"
+else
+  skip "python3 not installed — validator"
+fi
+
+echo "=== [5/5] Web endpoint boot ==="
+web_ok=0
+if command -v node >/dev/null 2>&1; then
+  if [ ! -d brahma/web/node_modules ]; then
+    echo "  ... installing web deps (npm ci/install)"
+    ( cd brahma/web && { npm ci --no-audit --no-fund >/tmp/brahma_npm.log 2>&1 \
+        || npm install --no-audit --no-fund >/tmp/brahma_npm.log 2>&1; } )
+  fi
+  if [ -d brahma/web/node_modules ]; then
+    PORT=3939
+    ( cd brahma/web && PORT=$PORT node server.js >/tmp/brahma_web.log 2>&1 ) &
+    WEB_PID=$!
+    # Wait up to ~5s for the server to answer.
+    for _ in $(seq 1 25); do
+      if curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null 2>&1; then break; fi
+      sleep 0.2
+    done
+    code="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/" 2>/dev/null || echo 000)"
+    api="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/api/modules" 2>/dev/null || echo 000)"
+    kill "$WEB_PID" >/dev/null 2>&1; wait "$WEB_PID" 2>/dev/null
+    if [ "$code" = "200" ] && [ "$api" = "200" ]; then
+      ok "Visual Cortex served / (200) and /api/modules (200)"; web_ok=1
+    else
+      bad "Visual Cortex boot (/ = $code, /api/modules = $api; see /tmp/brahma_web.log)"
+    fi
+  else
+    if [ "$STRICT" = "1" ]; then bad "could not install web deps (offline?)"; else skip "web deps unavailable (offline) — endpoint boot"; fi
+  fi
+else
+  skip "node not installed — web endpoint"
+fi
+
+echo
+echo "=== Summary: ${PASS} passed, ${FAIL} failed, ${SKIP} skipped ==="
+if [ "$FAIL" -gt 0 ]; then
+  echo "SMOKE: FAIL"
+  exit 1
+fi
+echo "SMOKE: PASS"

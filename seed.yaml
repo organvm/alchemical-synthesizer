@@ -12,10 +12,38 @@ metadata:
   implementation_status: ACTIVE
   tier: standard
   promotion_status: CANDIDATE
-  last_validated: "2026-02-16"
+  last_validated: "2026-06-18"
   generated: "2026-02-17"
   sprint: "SENSORIA"
   language: javascript
+  shipped: true
+
+# Activation contract (see issue #12 ACTIVATION AUDIT). The release pipeline
+# builds installable artifacts and attaches them to each tagged release; the
+# smoke test is the user-runnable shipped-test, also enforced in CI.
+artifacts:
+  - type: source-bundle
+    formats: ["tar.gz", "zip"]
+    build: "tools/build_release.sh"
+    published_via: "github-release"
+    workflow: ".github/workflows/release.yml"
+    trigger: "push tag v*"
+  - type: web-endpoint
+    entry: "brahma/web/server.js"
+    url: "http://localhost:3000"
+    start: "make serve"
+
+smoke_test:
+  command: "make smoke"
+  script: "tools/smoke.sh"
+  ci_workflow: ".github/workflows/ci.yml"
+  verifies:
+    - structure
+    - ableton-extension
+    - js-syntax
+    - python-validator
+    - web-endpoint
+  last_result: "PASS (11 checks, 2026-06-18)"
 
 agents: []
 
