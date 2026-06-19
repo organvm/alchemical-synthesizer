@@ -3,7 +3,7 @@ const WebSocket = require("ws");
 const express = require("express");
 const path = require("path");
 
-const HTTP_PORT = 3000;
+const HTTP_PORT = Number(process.env.PORT) || 3000;
 const OSC_UDP_PORT = 57122; // Listening for SC
 const OSC_SEND_PORT = 57120; // Sending to SC
 
@@ -11,7 +11,7 @@ const OSC_SEND_PORT = 57120; // Sending to SC
 const ALLOWED_NAMESPACES = [
     "/golem/", "/brahma/", "/chronos/", "/daemon/",
     "/moirai/", "/genesis/", "/arbor/", "/serpens/",
-    "/scriptorium/"
+    "/scriptorium/", "/ableton/"
 ];
 
 // Module registry cache (populated from SC broadcasts)

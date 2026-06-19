@@ -1,0 +1,7 @@
+node_modules/
+# SDK tarballs ship with the Live 12.4.5 beta — vendor them locally, don't commit.
+vendor/
+*.tgz
+# Packaged extension bundles
+dist/
+*.abletonextension

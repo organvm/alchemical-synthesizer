@@ -3,7 +3,7 @@
 #X obj 50 50 netreceive -u -b 57121;
 #X obj 50 80 oscparse;
 #X obj 50 110 list trim;
-#X obj 50 140 route /sc /golem /brahma /chronos /daemon /patch;
+#X obj 50 140 route /sc /golem /brahma /chronos /daemon /patch /ableton;
 #X obj 50 200 print SC_MSG;
 #X obj 150 200 print GOLEM_MSG;
 #X obj 270 200 print BRAHMA_MSG;
@@ -14,6 +14,7 @@
 #X obj 400 50 r to_sc;
 #X obj 400 80 oscformat;
 #X obj 400 110 netsend -u -b 127.0.0.1 57120;
+#X obj 590 200 print ABLETON_MSG;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;
 #X connect 3 0 4 0;
@@ -23,6 +24,7 @@
 #X connect 4 3 8 0;
 #X connect 4 4 9 0;
 #X connect 4 5 10 0;
-#X connect 4 6 11 0;
+#X connect 4 6 15 0;
+#X connect 4 7 11 0;
 #X connect 12 0 13 0;
 #X connect 13 0 14 0;

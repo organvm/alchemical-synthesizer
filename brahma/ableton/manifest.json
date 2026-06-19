@@ -1,0 +1,39 @@
+{
+  "id": "studio.brahma.bridge",
+  "name": "Brahma Bridge",
+  "version": "0.1.0",
+  "description": "Absorbs the structure of the active Live Set (tracks, clips, devices, tempo) and re-expresses it inside the Brahma Meta-Rack via OSC. Live becomes a donor identity the organism wears.",
+  "author": "Alchemical Synthesizer",
+  "minLiveVersion": "12.4.5",
+  "main": "src/index.js",
+  "permissions": [
+    "song.read",
+    "song.tempo.read",
+    "tracks.read",
+    "clips.read",
+    "devices.read",
+    "parameters.read"
+  ],
+  "settings": {
+    "oscHost": {
+      "type": "string",
+      "label": "Brahma OSC host",
+      "default": "127.0.0.1"
+    },
+    "oscPort": {
+      "type": "number",
+      "label": "Brahma OSC port (SuperCollider receive)",
+      "default": 57120
+    },
+    "broadcastHz": {
+      "type": "number",
+      "label": "State broadcast rate (Hz)",
+      "default": 10
+    },
+    "syncTransport": {
+      "type": "boolean",
+      "label": "Sync Live transport → Brahma / Chronos",
+      "default": true
+    }
+  }
+}

@@ -61,7 +61,8 @@ function connectWebSocket() {
 
 // OSC args arrive as [{type,value}, ...] (osc.js metadata mode).
 function handleOsc(msg) {
-    if (msg.address === "/brahma/organism/update") {
+    if (msg.address === "/brahma/organism/update" ||
+        msg.address === "/ableton/organism/update") {
         // Live engine speaks: on the handoff, purge any synthetic demo
         // organisms so real + demo streams never co-mingle in the counts.
         if (DemoStream.isActive()) DemoStream.clear(organisms);
