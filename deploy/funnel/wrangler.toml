@@ -1,0 +1,23 @@
+# ============================================================================
+#  wrangler.toml — AETHER free funnel on Cloudflare Pages.
+# ----------------------------------------------------------------------------
+#  The static radio-station home (product/public/home) + a waitlist capture
+#  Function (functions/api/v1/waitlist.js), deployed to Pages at $0. Demand
+#  before rails: this captures interest FIRST; the paid 24/7 sovereign stream
+#  (deploy/aether, the $5/mo L-MEDIA-ARK-HOST lever) follows demand.
+#
+#  Auth is non-interactive via CLOUDFLARE_API_TOKEN (organ-hydrated in
+#  ~/.limen.env) — no `wrangler login`. Deploy with deploy/funnel/deploy.sh.
+#
+#  `public/` (pages_build_output_dir) is ASSEMBLED at deploy time from
+#  product/public/home; it is gitignored (a copy of source, not source).
+# ============================================================================
+name = "aether"
+compatibility_date = "2026-07-01"
+pages_build_output_dir = "public"
+
+# The waitlist sink: a KV namespace in the owner's own CF account (sovereign,
+# private, free). Function reads it as env.AETHER_WAITLIST.
+[[kv_namespaces]]
+binding = "AETHER_WAITLIST"
+id = "f3cace328f18435e913cdcf2498e4a47"

@@ -111,8 +111,18 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
       → 404. Every backend call degrades gracefully (a pure-static deploy still
       captures demand). *Verified: Foundry smoke 21/21 (incl. home + audio
       stream/Range/409/404); live boot serves `/`, its assets, `/pricing`,
-      `/dashboard`, `/live`, and `/api/v1/specimens` all 200.* The first public
-      **deploy** stays the human-gated atom; no payment rail until a real buyer.
+      `/dashboard`, `/live`, and `/api/v1/specimens` all 200.*
+- [x] **Funnel is LIVE** — *(2026-07-02, demand before rails)* the free funnel
+      is deployed to Cloudflare Pages at **https://aether-0as.pages.dev**
+      (`deploy/funnel/`). Its own `POST /api/v1/waitlist` Pages Function captures
+      each signup durably to the **AETHER_WAITLIST** KV namespace in the owner's
+      own CF account (sovereign, private; `GET` is 405, no PII exposure). The
+      player degrades to "off air — join the waitlist" until the stream is up.
+      *Verified end-to-end live: home 200, valid POST → 200 + durable KV record,
+      invalid → 400; namespace ships empty. (Read signups back: `wrangler kv key
+      list --namespace-id <id> --remote` — `--remote` is required; wrangler v4
+      defaults to a local store.)* No payment rail until a real buyer. The paid
+      **24/7 stream** (`$5/mo` `L-MEDIA-ARK-HOST`, below) turns on with demand.
 - [x] **24/7 sovereign host** — *[increment 3]* the generator is containerized as
       a complete Cloudflare Containers deploy unit (`deploy/aether/`): a
       `Dockerfile` (ffmpeg + python3 + node, **no** SuperCollider — the fallback
