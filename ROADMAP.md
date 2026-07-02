@@ -99,11 +99,20 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
       rolling window, eviction, media-sequence) + `cellcycle`/`hls_append`
       self-tests in smoke; NRT path is SC-gated (SC not installed here, same as
       `bounce.sh`). Going public is the deploy gate (increments 2–3).*
-- [ ] **Home = live player + funnel** — *[increment 2]* the landing page becomes
-      Brahma's radio station: live player on top, packaged-track archive below,
-      real audio at `product/src/api/rest.js:65` (wire the `501` stub), existing
-      waitlist (`POST /api/v1/waitlist`). Deploy the static surface (CF Pages /
-      Vercel). Capture demand first; no payment rail until a real buyer exists.
+- [x] **Home = live player + funnel** — *[increment 2]* the landing page is now
+      Brahma's radio station (`product/public/home/`, static + config-driven so it
+      deploys to CF Pages/Vercel **or** is served by the Foundry at `/`): live
+      HLS player + provisional organism overlay on top, the packaged-track
+      **archive** below (live from `/api/v1/specimens`, static `archive.json`
+      fallback), and the **waitlist** capture (`POST /api/v1/waitlist`). The
+      audio `501` stub at `product/src/api/rest.js:65` is **wired** — real
+      specimen files stream with HTTP **Range** support (206) and path-traversal
+      safety, absolute `audioUrl`s 302-redirect to a CDN, simulated → 409, missing
+      → 404. Every backend call degrades gracefully (a pure-static deploy still
+      captures demand). *Verified: Foundry smoke 21/21 (incl. home + audio
+      stream/Range/409/404); live boot serves `/`, its assets, `/pricing`,
+      `/dashboard`, `/live`, and `/api/v1/specimens` all 200.* The first public
+      **deploy** stays the human-gated atom; no payment rail until a real buyer.
 - [ ] **24/7 sovereign host** — *[increment 3]* move the generator into a CF
       Container (media-ark's `Dockerfile` + `wrangler containers` pattern, R2 for
       segments). Gated on the $5/mo Workers-Paid lever `L-MEDIA-ARK-HOST`.

@@ -8,11 +8,18 @@
  *   node bin/smoke.js
  */
 
-process.env.FOUNDRY_DATA_DIR = require("path").join(require("os").tmpdir(), "brahma-foundry-smoke-" + Date.now());
+const path = require("path");
+const os = require("os");
+const fs = require("fs");
+
+const SPECIMENS_DIR = path.join(os.tmpdir(), "brahma-foundry-specimens-" + Date.now());
+process.env.FOUNDRY_DATA_DIR = path.join(os.tmpdir(), "brahma-foundry-smoke-" + Date.now());
+process.env.BRAHMA_SPECIMENS_DIR = SPECIMENS_DIR; // where wired specimen audio is streamed from
 process.env.OSC_RECV_PORT = "0"; // avoid binding the real OSC port during tests
 process.env.PORT = "0";
 
 const { server } = require("../server");
+const { collection } = require("../src/core/store");
 
 let pass = 0, fail = 0;
 function check(name, cond, extra) {
@@ -79,6 +86,42 @@ async function main() {
   // 9. Waitlist
   r = await J(await fetch(`${base}/api/v1/waitlist`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: `wl_${Date.now()}@brahma.test` }) }));
   check("POST /waitlist joins", r.status === 200 && r.body.data.joined, r.body);
+
+  // 10. AETHER radio-station home (the funnel landing) is served at /
+  const home = await fetch(`${base}/`);
+  const homeHtml = await home.text();
+  check("GET / serves the AETHER radio home", home.status === 200 && /AETHER/.test(homeHtml) && /home\.js/.test(homeHtml), home.status);
+
+  // 11. Specimen audio streaming — the wired 501 stub (rest.js).
+  fs.mkdirSync(SPECIMENS_DIR, { recursive: true });
+  fs.writeFileSync(path.join(SPECIMENS_DIR, "specimen-real.wav"), Buffer.alloc(4096, 1)); // stand-in bytes; type is by extension
+  const realId = "spec_real_" + Date.now();
+  collection("specimens").insert({ id: realId, title: "Real Specimen", creator: "brahma", sourceModule: "Azoth", audioUrl: "specimen-real.wav", forSale: true, simulated: false, createdAt: new Date().toISOString() });
+
+  let ar = await fetch(`${base}/api/v1/specimens/${realId}/audio`);
+  const abuf = await ar.arrayBuffer();
+  check("GET /specimens/:id/audio streams the real file (200)",
+    ar.status === 200 && ar.headers.get("content-type") === "audio/wav" && abuf.byteLength === 4096,
+    { status: ar.status, ct: ar.headers.get("content-type"), len: abuf.byteLength });
+  check("audio endpoint advertises Range support", ar.headers.get("accept-ranges") === "bytes");
+
+  ar = await fetch(`${base}/api/v1/specimens/${realId}/audio`, { headers: { Range: "bytes=0-99" } });
+  const pbuf = await ar.arrayBuffer();
+  check("audio Range request → 206 partial content",
+    ar.status === 206 && pbuf.byteLength === 100 && /bytes 0-99\/4096/.test(ar.headers.get("content-range") || ""),
+    { status: ar.status, len: pbuf.byteLength, cr: ar.headers.get("content-range") });
+
+  // simulated specimen → 409 (unchanged honest behavior)
+  const simId = "spec_sim_" + Date.now();
+  collection("specimens").insert({ id: simId, title: "Sim", creator: "brahma", simulated: true, forSale: true, createdAt: new Date().toISOString() });
+  r = await J(await fetch(`${base}/api/v1/specimens/${simId}/audio`));
+  check("simulated specimen audio → 409", r.status === 409, r.status);
+
+  // real specimen whose file is missing → 404 (not a false 200)
+  const missId = "spec_miss_" + Date.now();
+  collection("specimens").insert({ id: missId, title: "Miss", creator: "brahma", simulated: false, audioUrl: "nope.wav", forSale: true, createdAt: new Date().toISOString() });
+  r = await J(await fetch(`${base}/api/v1/specimens/${missId}/audio`));
+  check("real specimen, missing file → 404", r.status === 404, r.status);
 
   console.log(`\nSmoke: ${pass} passed, ${fail} failed`);
   server.close();
