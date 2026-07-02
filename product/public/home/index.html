@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AETHER · Brahma — a living radio</title>
+    <meta name="description" content="Brahma is a living radio: an instrument with no voice of its own that listens to the world's audio, transmutes it, and broadcasts its own unrepeatable, evolving stream.">
+    <!-- HLS.js (CDN, same idiom as the rest of the estate); Safari plays HLS natively. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wrap">
+
+    <!-- ── Hero ─────────────────────────────────────────────────────── -->
+    <header class="hero">
+        <div class="mark">◐</div>
+        <h1 id="station">AETHER</h1>
+        <p class="tagline" id="tagline">a living radio — Brahma listens, transmutes, and broadcasts its own</p>
+        <span class="live off" id="liveflag"><span class="dot"></span><span id="livetext">offline</span></span>
+    </header>
+
+    <!-- ── Live player (top of the funnel) ──────────────────────────── -->
+    <section class="player card">
+        <audio id="audio" controls playsinline></audio>
+        <div class="hint" id="hint">Tuning in…</div>
+        <div class="organism" id="organism">
+            <span class="badge" id="phase">—</span>
+            <span class="creature" id="creature">awaiting the organism</span>
+            <span class="epoch" id="epoch"></span>
+            <div class="meters">
+                <span>coherence</span><div class="bar"><i id="bar-coherence"></i></div>
+                <span>entropy</span><div class="bar"><i id="bar-entropy"></i></div>
+            </div>
+            <p class="provisional">⚠ coherence / entropy are <b>provisional</b> indicators of an intended inner life — not measurements.</p>
+        </div>
+    </section>
+
+    <!-- ── The pitch (the wedge, from the market surface) ───────────── -->
+    <section class="pitch">
+        <h2>An instrument with no voice of its own — it becomes whatever you feed it.</h2>
+        <p>Brahma metabolizes the audio it consumes and re-expresses it as an unrepeatable performance.
+        Power-up is amnesia; power-down is death; a recording is a specimen of a moment that will never
+        exist again. What you hear above is <b>alive right now</b>, not a playlist.</p>
+    </section>
+
+    <!-- ── Archive (packaged specimens = the shop) ──────────────────── -->
+    <section class="archive">
+        <h2>Specimens <span class="sub">— captured from the stream</span></h2>
+        <div id="archive-list" class="grid">
+            <div class="empty" id="archive-empty">Loading the archive…</div>
+        </div>
+    </section>
+
+    <!-- ── Waitlist (capture demand — no payment rail yet) ──────────── -->
+    <section class="waitlist card" id="waitlist">
+        <h2>Get the next transmission</h2>
+        <p>New specimens and the live schedule, when there's something worth your ears. No spam.</p>
+        <form id="wl-form">
+            <input type="email" id="wl-email" placeholder="you@domain.com" required autocomplete="email">
+            <button type="submit">Join</button>
+        </form>
+        <div class="wl-msg" id="wl-msg"></div>
+    </section>
+
+    <footer>
+        <p>The stream is a <b>lineage, not a loop</b>. · <a href="/pricing">plans &amp; API →</a></p>
+    </footer>
+
+</main>
+<script src="config.js"></script>
+<script src="home.js"></script>
+</body>
+</html>

@@ -54,14 +54,32 @@ app.use("/api/v1", restRouter);
 app.use("/mcp", mcpRouter);
 app.use("/acp", acpRouter);
 
+// --- AETHER live broadcast stream (served for the radio-station home's player) ---
+// tools/broadcast.sh writes a rolling HLS stream + telemetry into out/live. In a
+// combined deployment the broadcast runs alongside this server; point
+// BRAHMA_LIVE_DIR at its output. Playlist/telemetry must not be cached.
+const LIVE_DIR = process.env.BRAHMA_LIVE_DIR || path.join(__dirname, "..", "out", "live");
+app.use("/live", express.static(LIVE_DIR, {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith(".m3u8") || filePath.endsWith(".json")) {
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    } else if (filePath.endsWith(".ts")) {
+      res.setHeader("Content-Type", "video/mp2t");
+    }
+  },
+}));
+
 // --- Static front end ---
+const homeDir = path.join(__dirname, "public", "home");
 app.use("/dashboard", express.static(path.join(__dirname, "public", "dashboard")));
 app.use("/pricing", express.static(path.join(__dirname, "public", "pricing")));
 app.use("/marketplace", express.static(path.join(__dirname, "public", "dashboard"))); // marketplace tab lives in dashboard SPA
+app.use("/home", express.static(homeDir));
 app.use(express.static(path.join(__dirname, "public")));
 
-// Root → landing
-app.get("/", (req, res) => res.redirect("/pricing"));
+// Root → the AETHER radio-station home: live player + packaged-track archive +
+// waitlist (the funnel). Served static so its relative assets resolve at /.
+app.use("/", express.static(homeDir));
 
 // Health
 app.get("/healthz", (req, res) => res.json({ ok: true, engine: engine.isOnline() ? "online" : "simulation", uptime: process.uptime() }));

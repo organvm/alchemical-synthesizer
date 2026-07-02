@@ -1,0 +1,4 @@
+{
+  "_note": "Static archive fallback for a pure-static deploy (no Foundry API). When the Foundry is reachable, home.js prefers the live /api/v1/specimens marketplace and ignores this file. Populate `specimens[]` from `make package` outputs; set `audioUrl` to a served/CDN path.",
+  "specimens": []
+}

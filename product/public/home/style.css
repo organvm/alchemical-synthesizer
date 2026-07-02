@@ -1,0 +1,66 @@
+/* AETHER radio-station home — dark, on-brand with the theatron player palette. */
+:root {
+    --bg: #02030a; --panel: #060a18; --ink: #e8ecff; --dim: #7f88b8;
+    --line: #1a2140; --accent: #7ba7ff; --warn: #ffcf6b;
+    --readable: #6bd6ff; --cluster: #ffb86b; --dispersal: #ff6b9d;
+}
+* { box-sizing: border-box; font-family: "SF Mono", "JetBrains Mono", "Menlo", monospace; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); }
+a { color: var(--accent); }
+.wrap { max-width: 900px; margin: 0 auto; padding: 32px 20px 72px; }
+
+.card { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 20px; }
+
+/* Hero */
+.hero { text-align: center; padding: 28px 0 8px; position: relative; }
+.hero .mark { font-size: 44px; color: var(--accent); animation: spin 12s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.hero h1 { font-size: 40px; letter-spacing: 8px; margin: 8px 0 4px; }
+.hero .tagline { color: var(--dim); margin: 0; font-size: 13px; }
+.live { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; font-size: 12px; color: var(--dispersal); }
+.live .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dispersal); animation: pulse 1.4s infinite; }
+.live.off { color: var(--dim); } .live.off .dot { background: var(--dim); animation: none; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+
+/* Player */
+.player { margin: 22px 0; }
+audio { width: 100%; }
+.hint { color: var(--dim); font-size: 12px; margin: 8px 0 0; }
+.organism { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 14px; }
+.badge { font-size: 12px; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--line); }
+.badge.phase-readable { color: var(--readable); border-color: var(--readable); }
+.badge.phase-cluster { color: var(--cluster); border-color: var(--cluster); }
+.badge.phase-dispersal { color: var(--dispersal); border-color: var(--dispersal); }
+.creature { color: var(--accent); font-size: 14px; margin-left: 10px; }
+.epoch { color: var(--dim); font-size: 12px; margin-left: 10px; }
+.meters { display: grid; grid-template-columns: 90px 1fr; gap: 6px 12px; align-items: center; margin: 14px 0 0; font-size: 12px; color: var(--dim); }
+.bar { height: 7px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .4s ease; }
+.provisional { color: var(--warn); font-size: 11px; margin: 12px 0 0; }
+
+/* Pitch */
+.pitch { margin: 34px 0; }
+.pitch h2 { font-size: 22px; line-height: 1.35; }
+.pitch p { color: var(--dim); line-height: 1.7; font-size: 14px; }
+
+/* Archive */
+.archive { margin: 34px 0; }
+.archive h2 { font-size: 18px; } .archive .sub { color: var(--dim); font-weight: normal; font-size: 13px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+.spec { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 14px; }
+.spec-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.spec-title { font-size: 14px; } .spec-price { color: var(--warn); font-size: 13px; }
+.spec-meta { color: var(--dim); font-size: 12px; margin: 6px 0 10px; }
+.spec audio { width: 100%; height: 34px; }
+.empty { color: var(--dim); font-size: 13px; padding: 20px; grid-column: 1 / -1; text-align: center; }
+
+/* Waitlist */
+.waitlist { margin: 34px 0; }
+.waitlist h2 { font-size: 18px; margin-top: 0; } .waitlist p { color: var(--dim); font-size: 13px; }
+#wl-form { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+#wl-email { flex: 1; min-width: 220px; background: #0a0f22; border: 1px solid var(--line); color: var(--ink); padding: 10px 12px; border-radius: 8px; font-size: 14px; }
+#wl-form button { background: var(--accent); color: #04122e; border: 0; padding: 10px 22px; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: bold; }
+#wl-form button:hover { filter: brightness(1.1); }
+.wl-msg { color: var(--dim); font-size: 12px; margin-top: 10px; min-height: 16px; }
+
+footer { margin-top: 40px; color: var(--dim); font-size: 12px; text-align: center; }

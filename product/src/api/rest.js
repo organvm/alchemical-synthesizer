@@ -7,6 +7,8 @@
  */
 
 const express = require("express");
+const fs = require("fs");
+const path = require("path");
 const actions = require("../core/actions");
 const licensing = require("../auth/licensing");
 const { meter } = require("../auth/metering");
@@ -14,6 +16,15 @@ const { getPlan, listPlans } = require("../auth/plans");
 const billing = require("../billing/billing");
 const marketplace = require("../marketplace/marketplace");
 const { collection } = require("../core/store");
+
+// Where real (non-simulated) specimen audio lives on disk. A specimen's
+// audioUrl is either an absolute http(s) URL (a CDN/R2 object — we redirect) or
+// a filename resolved under this dir (we stream it, path-traversal-safe).
+const SPECIMENS_DIR = process.env.BRAHMA_SPECIMENS_DIR || path.join(__dirname, "..", "..", "data", "specimens");
+const AUDIO_TYPES = {
+  ".wav": "audio/wav", ".mp3": "audio/mpeg", ".m4a": "audio/mp4", ".aac": "audio/aac",
+  ".ogg": "audio/ogg", ".flac": "audio/flac", ".opus": "audio/opus", ".mp4": "video/mp4"
+};
 
 const router = express.Router();
 router.use(express.json({ limit: "256kb" }));
@@ -68,8 +79,12 @@ router.get("/specimens/:id/audio", (req, res) => {
   if (s.simulated || !s.audioUrl) {
     return fail(res, 409, "specimen_simulated", { hint: "Audio is produced by a live SuperCollider engine; this specimen was rendered in simulation mode." });
   }
-  // In a live deployment the SC NRT renderer writes a WAV that is streamed here.
-  return fail(res, 501, "audio_streaming_not_implemented", { note: "Wire SC NRT output path here (see product/README.md)." });
+  // A real specimen: the NRT renderer / package pipeline wrote a file (or pushed
+  // it to a CDN). Redirect absolute URLs; stream local files with Range support.
+  const resolved = resolveSpecimenAudio(s.audioUrl);
+  if (!resolved) return fail(res, 404, "audio_file_missing", { note: "audioUrl does not resolve to a stored specimen file." });
+  if (resolved.url) return res.redirect(302, resolved.url);
+  return streamFile(req, res, resolved.file);
 });
 
 router.post("/specimens/:id/list", meter({ cost: 0 }), (req, res) => {
@@ -162,6 +177,54 @@ router.post("/waitlist", (req, res) => {
   ok(res, { joined: true });
 });
 
+// ---- specimen audio resolution + streaming ----
+
+/**
+ * Resolve a specimen's audioUrl to something servable.
+ *   { url }  — an absolute http(s) URL (CDN/R2): the caller redirects.
+ *   { file } — an on-disk file under SPECIMENS_DIR (path-traversal-safe).
+ *   null     — unresolvable / escapes the specimens dir / missing.
+ */
+function resolveSpecimenAudio(audioUrl) {
+  if (!audioUrl) return null;
+  if (/^https?:\/\//i.test(audioUrl)) return { url: audioUrl };
+  const rel = String(audioUrl).replace(/^\/+/, "");
+  const base = path.resolve(SPECIMENS_DIR);
+  const abs = path.resolve(base, rel);
+  // Reject anything that escapes SPECIMENS_DIR (e.g. "../../etc/passwd").
+  if (abs !== base && !abs.startsWith(base + path.sep)) return null;
+  return fs.existsSync(abs) ? { file: abs } : null;
+}
+
+/** Stream a local audio file with HTTP Range support so players can seek. */
+function streamFile(req, res, file) {
+  let stat;
+  try { stat = fs.statSync(file); } catch { return fail(res, 404, "audio_file_missing"); }
+  const type = AUDIO_TYPES[path.extname(file).toLowerCase()] || "application/octet-stream";
+  res.setHeader("Accept-Ranges", "bytes");
+  res.setHeader("Content-Type", type);
+  res.setHeader("Cache-Control", "public, max-age=3600"); // a specimen file is immutable
+
+  const range = req.headers.range;
+  if (range) {
+    const m = /bytes=(\d*)-(\d*)/.exec(range) || [];
+    let start = m[1] ? parseInt(m[1], 10) : 0;
+    let end = m[2] ? parseInt(m[2], 10) : stat.size - 1;
+    if (isNaN(start) || start < 0) start = 0;
+    if (isNaN(end) || end >= stat.size) end = stat.size - 1;
+    if (start > end) {
+      res.status(416).setHeader("Content-Range", `bytes */${stat.size}`);
+      return res.end();
+    }
+    res.status(206);
+    res.setHeader("Content-Range", `bytes ${start}-${end}/${stat.size}`);
+    res.setHeader("Content-Length", end - start + 1);
+    return fs.createReadStream(file, { start, end }).pipe(res);
+  }
+  res.setHeader("Content-Length", stat.size);
+  return fs.createReadStream(file).pipe(res);
+}
+
 // ---- minimal OpenAPI generator ----
 function buildOpenApi() {
   return {
@@ -174,6 +237,7 @@ function buildOpenApi() {
       "/organism/state": { get: { summary: "Live organism telemetry" } },
       "/render": { post: { summary: "Render a specimen (metered)", security: [{ apiKey: [] }] } },
       "/specimens": { get: { summary: "List marketplace specimens" } },
+      "/specimens/{id}/audio": { get: { summary: "Stream a specimen's audio (Range-enabled; 302 to CDN, 409 if simulated)" } },
       "/plans": { get: { summary: "List plans" } },
       "/billing/checkout/plan": { post: { summary: "Start a plan checkout" } },
       "/account/signup": { post: { summary: "Create an account" } },
