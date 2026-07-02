@@ -60,15 +60,44 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
       TRACK=out/x.wav [TITLE="…"] [LINK=…]` (`tools/package.sh` →
       `videotrack.sh --attribution --title --cover`). *Composes with `make
       track`/`make stemtrack`; verified on-machine.*
-- [ ] **Funnel** — serve real audio at `/api/v1/specimens/:id/audio`, a track
-      landing page with the existing waitlist capture, deploy the static surface
-      (capture demand first; no payment rail until a real buyer exists).
+### AETHER — a living radio: Brahma listens, transmutes, broadcasts
+> The evolution of "Funnel" (2026-07-02): the alchemical synthesizer becomes a
+> transceiver. It **listens** to free/live web audio, **transmutes** it through
+> the Forge, and **broadcasts** its own generative, evolving stream — whose home
+> page *is* the funnel (live player + demand capture + the packaged-track archive).
+
+- [x] **Listen** — sample live/free web audio (internet-radio streams +
+      public-domain / CC0 archives) into a Forge-ready WAV. `tools/tune.py` +
+      `stations.json` (a license-tagged source registry) + `make tune`/`make
+      stations`. Every capture writes a provenance sidecar (`<out>.source.json`)
+      and is license-gated: `--publish-safe-only` refuses anything not
+      public-domain/CC0/CC-BY/own, so an automated cadence can only pull
+      clearable material. *Verified on-machine: a 3 s capture from a live icecast
+      stream → SPECIMEN VIABLE through `validate_audio.py`, flows into `make
+      rip`/`make track`. Rights posture stays human-gated — the tool records the
+      license, it does not grant clearance.*
+- [ ] **Broadcast (local)** — a continuous *generative* Brahma performance
+      (audio that evolves + folds in freshly-sampled material) rendered with the
+      live Etz Chaim visuals to a **local** stream endpoint (HLS/Icecast), proven
+      end-to-end. Going public is the deploy gate.
+- [ ] **Home = live player + funnel** — the landing page becomes Brahma's radio
+      station: a live player at the top, the packaged-track archive below, real
+      audio served at `/api/v1/specimens/:id/audio` (wire the `501` stub at
+      `product/src/api/rest.js:65`), and the existing waitlist capture
+      (`POST /api/v1/waitlist`). Capture demand first; no payment rail until a
+      real buyer exists. Deploy the static surface (sovereign rail — self-hosted
+      Icecast/Owncast — over a rented platform; social platforms are re-broadcast
+      lures, not the home).
 
 **Human-gated decision atoms** (do not silently decide):
-- **Rights posture** — commercially sampling copyrighted songs. Safe default in the
-  tooling: pipeline runs on *any* input, but anything **published/sold** uses
-  rights-cleared source (your own / CC0 / licensed) or unrecognizably transformed
-  material; recognizable-song rips stay private R&D until cleared.
+- **Rights posture** — commercially sampling copyrighted songs *or radio/stream
+  captures*. Safe default in the tooling: the pipeline runs on *any* input, but
+  anything **published/sold** uses rights-cleared source (your own / CC0 /
+  licensed) or unrecognizably transformed material; recognizable rips stay
+  private R&D until cleared. *Now partly operationalized:* `stations.json` tags
+  each source's license and `tune.py --publish-safe-only` enforces the
+  public-domain/CC0/CC-BY/own set — but the **policy** (what you actually publish)
+  remains yours.
 - **Social surface** — which handle/platform hosts the tracks (the studio face is
   text/voice-branded; Brahma music likely needs its own identity).
 
