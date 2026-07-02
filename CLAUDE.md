@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The **Alchemical Synthesizer** (Brahma Meta-Rack) is a modular synthesis organism that absorbs, mutates, and re-expresses sonic identities from other systems. It is a parasitic-symbiotic apparatus—not a fixed instrument—whose identity is contingent on contact.
 
+This repo hosts **two products**: **Brahma** (the audio synthesizer + the `product/` Foundry surface) and **AETHER** (the 24/7 living-radio streaming service). AETHER is a distinct modular product co-located here; its boundary and extraction recipe are declared in [`aether/`](aether/README.md) and mapped in [`aether/MANIFEST.md`](aether/MANIFEST.md). Treat broadcast tooling (`tools/broadcast.sh`, `tools/rebroadcast.sh`, `tools/tune.py`, `tools/ingest_queue.py`, `deploy/aether/`, `brahma/web/public/aether/`) as AETHER's, not the engine's.
+
 ## Technology Stack
 
 - **SuperCollider** (`brahma/sc/`): DSP engine, trait registries, state machines (~20,000 LOC across 60+ files, 6 classes)

@@ -7,6 +7,12 @@
 
 > **The Brahma Meta-Rack**: A modular alchemical synthesizer designed to absorb, mutate, and re-express the identities of other systems.
 
+> **Two products live in this repo.** **Brahma** — the audio synthesizer (this README) and its
+> commercial [Foundry](#productization--the-foundry) surface — and **[AETHER](aether/README.md)**,
+> the 24/7 living-radio streaming service. They share the engine but are separate modular
+> products; AETHER's boundary, footprint, and standalone-extraction recipe are declared in
+> [`aether/`](aether/README.md).
+
 ---
 
 ## Motivation
