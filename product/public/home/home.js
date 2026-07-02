@@ -22,22 +22,32 @@
     if (CFG.tagline) $("tagline").textContent = CFG.tagline;
 
     // ---- 1. Live player (HLS.js, Safari-native fallback) ----------------
+    // State-aware: pre-launch (no stream up yet) the funnel is honest — it says
+    // "off air, join the waitlist" instead of pretending to tune a dead 404.
     var audio = $("audio");
+    var everOnAir = false, netStrikes = 0;
+    var OFFAIR = "Off air — the first broadcast is coming. Join the waitlist below for the schedule.";
+    function onAir(msg) { everOnAir = true; netStrikes = 0; $("hint").textContent = msg; }
     function attach() {
         if (window.Hls && window.Hls.isSupported()) {
             var hls = new window.Hls({ liveSyncDurationCount: 3, enableWorker: true });
             hls.loadSource(STREAM);
             hls.attachMedia(audio);
-            hls.on(window.Hls.Events.MANIFEST_PARSED, function () { $("hint").textContent = "On air — press play."; });
+            hls.on(window.Hls.Events.MANIFEST_PARSED, function () { onAir("On air — press play."); });
             hls.on(window.Hls.Events.ERROR, function (evt, data) {
-                if (data && data.fatal) {
-                    if (data.type === window.Hls.ErrorTypes.NETWORK_ERROR) setTimeout(function () { hls.startLoad(); }, 1500);
-                    else if (data.type === window.Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+                if (!data || !data.fatal) return;
+                if (data.type === window.Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); return; }
+                if (data.type === window.Hls.ErrorTypes.NETWORK_ERROR) {
+                    // Not on air yet: back off + guide to the waitlist. Once it's
+                    // ever been on air, keep the tight 1.5s live-recovery cadence.
+                    if (!everOnAir && ++netStrikes >= 2) { $("hint").textContent = OFFAIR; setLive(false); }
+                    setTimeout(function () { hls.startLoad(); }, everOnAir ? 1500 : 8000);
                 }
             });
         } else if (audio.canPlayType("application/vnd.apple.mpegurl")) {
             audio.src = STREAM;
-            $("hint").textContent = "On air (native HLS) — press play.";
+            audio.addEventListener("loadedmetadata", function () { onAir("On air (native HLS) — press play."); });
+            audio.addEventListener("error", function () { if (!everOnAir) { $("hint").textContent = OFFAIR; setLive(false); } });
         } else {
             $("hint").textContent = "This browser can't play HLS — try Safari or a Chromium/Firefox build.";
         }
