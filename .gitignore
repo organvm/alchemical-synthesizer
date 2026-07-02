@@ -30,8 +30,12 @@ dist/
 *.scx
 synthdefs/
 
-# Forge pipeline outputs (stems, recipes, rendered tracks) + demucs env
-forge/
+# Forge pipeline outputs (stems, recipes, rendered tracks) + demucs env.
+# Ignore the runtime output only — the Forge lane itself (ORGAN.md, and tools as
+# they consolidate here) is tracked. See ORGANS.md.
+forge/stems/
+forge/recipes/
+forge/out/
 out/
 .venv-demucs/
 
