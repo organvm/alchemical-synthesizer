@@ -59,10 +59,15 @@ echo "=== [3/6] JS syntax (node --check) ==="
 if command -v node >/dev/null 2>&1; then
   for js in brahma/web/server.js brahma/web/public/sketch.js \
             brahma/web/public/tree/video.js brahma/web/public/aether/aether.js \
+            brahma/web/public/instrument/pattern.js brahma/web/public/instrument/instrument.js \
             deploy/aether/serve.js deploy/aether/worker.mjs tools/render_video.mjs; do
     [ -f "$js" ] || continue
     if node --check "$js" >/dev/null 2>&1; then ok "node --check $js"; else bad "node --check $js"; fi
   done
+  # The tracker/sampler instrument's brain (pattern.js) is pure + node-testable.
+  if [ -f brahma/web/public/instrument/pattern.js ]; then
+    if node brahma/web/public/instrument/pattern.js --self-test >/tmp/brahma_pattern.log 2>&1; then ok "instrument pattern.js --self-test"; else bad "instrument pattern.js --self-test"; tail -8 /tmp/brahma_pattern.log; fi
+  fi
 else
   skip "node not installed — JS syntax"
 fi
@@ -172,6 +177,8 @@ done
 # AETHER theatron player: the live-broadcast surface must ship with the runtime.
 [ -f brahma/web/public/aether/index.html ] && ok "exists: brahma/web/public/aether/index.html" || bad "missing: brahma/web/public/aether/index.html"
 [ -f brahma/web/public/aether/aether.js ] && ok "exists: brahma/web/public/aether/aether.js" || bad "missing: brahma/web/public/aether/aether.js"
+# AETHER playable instrument (tracker-brained, Ableton-bodied).
+[ -f brahma/web/public/instrument/index.html ] && ok "exists: brahma/web/public/instrument/index.html" || bad "missing: brahma/web/public/instrument/index.html"
 
 echo
 echo "=== Summary: ${PASS} passed, ${FAIL} failed, ${SKIP} skipped ==="
