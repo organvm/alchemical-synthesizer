@@ -30,7 +30,7 @@ ok()   { echo "  PASS  $1"; PASS=$((PASS+1)); }
 bad()  { echo "  FAIL  $1"; FAIL=$((FAIL+1)); }
 skip() { echo "  SKIP  $1"; SKIP=$((SKIP+1)); }
 
-echo "=== [1/5] Structure ==="
+echo "=== [1/6] Structure ==="
 req_files=(
   "brahma/sc/loader.scd"
   "brahma/web/server.js"
@@ -44,7 +44,7 @@ done
 scd_count="$(find brahma/sc -name '*.scd' | wc -l | tr -d ' ')"
 if [ "$scd_count" -ge 60 ]; then ok "SynthDef files: ${scd_count} (>= 60)"; else bad "SynthDef files: ${scd_count} (< 60)"; fi
 
-echo "=== [2/5] Ableton extension smoke (node) ==="
+echo "=== [2/6] Ableton extension smoke (node) ==="
 if command -v node >/dev/null 2>&1; then
   if node brahma/ableton/test/smoke.js >/tmp/brahma_ext_smoke.log 2>&1; then
     ok "brahma/ableton/test/smoke.js"
@@ -55,7 +55,7 @@ else
   skip "node not installed — extension smoke"
 fi
 
-echo "=== [3/5] JS syntax (node --check) ==="
+echo "=== [3/6] JS syntax (node --check) ==="
 if command -v node >/dev/null 2>&1; then
   for js in brahma/web/server.js brahma/web/public/sketch.js; do
     if node --check "$js" >/dev/null 2>&1; then ok "node --check $js"; else bad "node --check $js"; fi
@@ -64,7 +64,7 @@ else
   skip "node not installed — JS syntax"
 fi
 
-echo "=== [4/5] Python audio validator ==="
+echo "=== [4/6] Python audio validator ==="
 if command -v python3 >/dev/null 2>&1; then
   TONE="$(mktemp -d)/test_tone.wav"
   if python3 tools/gen_test_tone.py "$TONE" >/dev/null 2>&1 \
@@ -78,7 +78,7 @@ else
   skip "python3 not installed — validator"
 fi
 
-echo "=== [5/5] Web endpoint boot ==="
+echo "=== [5/6] Web endpoint boot ==="
 web_ok=0
 if command -v node >/dev/null 2>&1; then
   if [ ! -d brahma/web/node_modules ]; then
@@ -109,6 +109,23 @@ if command -v node >/dev/null 2>&1; then
 else
   skip "node not installed — web endpoint"
 fi
+
+echo "=== [6/6] Forge tools syntax (py_compile + bash -n) ==="
+if command -v python3 >/dev/null 2>&1; then
+  for py in tools/rip.py tools/stemforge.py tools/validate_audio.py tools/gen_test_tone.py; do
+    [ -f "$py" ] || continue
+    if python3 -m py_compile "$py" >/tmp/brahma_pyc.log 2>&1; then ok "py_compile $py"; else bad "py_compile $py (see /tmp/brahma_pyc.log)"; tail -5 /tmp/brahma_pyc.log; fi
+  done
+else
+  skip "python3 not installed — Forge py syntax"
+fi
+for sh in tools/forge.sh tools/bounce.sh tools/ingest.sh tools/setup-demucs.sh tools/smoke.sh; do
+  [ -f "$sh" ] || continue
+  if bash -n "$sh" >/dev/null 2>&1; then ok "bash -n $sh"; else bad "bash -n $sh"; fi
+done
+for scd in brahma/sc/13_nrt_renderer.scd brahma/sc/14_stem_voices.scd; do
+  [ -f "$scd" ] && ok "exists: $scd" || bad "missing: $scd"
+done
 
 echo
 echo "=== Summary: ${PASS} passed, ${FAIL} failed, ${SKIP} skipped ==="

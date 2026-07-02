@@ -11,9 +11,10 @@
 #   make forge     recombine stolen stems:        make forge NAME=heist DRUMS=a/drums.wav MELODY=b/other.wav
 #   make render    Brahma re-expresses a WAV:      make render SONG=in.wav OUT=out.wav [DUR=12]
 #   make track     stems -> re-expressed track:    make track NAME=heist DRUMS=a/drums.wav MELODY=b/other.wav OUT=out/heist.wav [DUR=12]
+#   make stemtrack per-stem modular render:         make stemtrack NAME=heist DRUMS=a/drums.wav MELODY=b/other.wav OUT=out/heist.wav [MAP=drums=ossuary,other=janiform] [DUR=12]
 #   make demucs    install TRUE separation (htdemucs) for higher-quality rips
 
-.PHONY: help smoke dist serve validate clean rip forge render track demucs
+.PHONY: help smoke dist serve validate clean rip forge render track stemtrack demucs
 
 help:
 	@grep -E '^#   make ' Makefile | sed 's/^#   /  /'
@@ -55,6 +56,16 @@ track:
 		{ echo "usage: make track NAME=x DRUMS=a/drums.wav MELODY=b/other.wav OUT=out/x.wav [DUR=12]"; exit 1; }
 	bash tools/forge.sh --name $(NAME) --drums "$(DRUMS)" --melody "$(MELODY)" --mix
 	bash tools/bounce.sh forge/recipes/$(NAME)/premix.wav "$(OUT)" $(DUR)
+
+# stemtrack: like track, but render EACH stem through its own creature-voice and
+# sum under a master limiter (drums->ossuary, bass->mnemosyne, vocals->chrysalid,
+# melody->prima). No premix — the modular path. --map/DUR are optional.
+stemtrack:
+	@test -n "$(NAME)" && test -n "$(DRUMS)" && test -n "$(MELODY)" && test -n "$(OUT)" || \
+		{ echo "usage: make stemtrack NAME=x DRUMS=a/drums.wav MELODY=b/other.wav OUT=out/x.wav [BASS=..] [VOCALS=..] [MAP=drums=ossuary] [DUR=12]"; exit 1; }
+	bash tools/forge.sh --name $(NAME) --drums "$(DRUMS)" --melody "$(MELODY)" \
+		$(if $(BASS),--bass "$(BASS)",) $(if $(VOCALS),--vocals "$(VOCALS)",)
+	python3 tools/stemforge.py $(NAME) --out "$(OUT)" $(if $(DUR),--dur $(DUR),) $(if $(MAP),--map $(MAP),)
 
 demucs:
 	bash tools/setup-demucs.sh
