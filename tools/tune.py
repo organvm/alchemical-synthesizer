@@ -99,13 +99,25 @@ def cmd_list(stations: list[dict]) -> int:
     return 0
 
 
+def _is_network_url(url: str) -> bool:
+    """True for protocols where ffmpeg's -reconnect options are valid. They are
+    HTTP(S)/stream-only; passing them for a local file makes ffmpeg exit with
+    'Option not found', so we scope them (also lets the Ouroboros absorb a
+    file:// or local-path donor)."""
+    return url.lower().startswith(
+        ("http://", "https://", "rtmp://", "rtmps://", "rtsp://", "srt://", "hls://", "ftp://"))
+
+
 def capture(ffmpeg: str, url: str, out: str, secs: int) -> None:
     """Pull `secs` seconds from `url` into a stereo 44.1 kHz WAV at `out`."""
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
+    # input reconnection (must precede -i): a dropped stream re-dials. Only valid
+    # for network inputs — omitted for local files.
+    reconnect = ["-reconnect", "1", "-reconnect_streamed", "1", "-reconnect_delay_max", "5"] \
+        if _is_network_url(url) else []
     cmd = [
         ffmpeg, "-hide_banner", "-loglevel", "error", "-y",
-        # input reconnection (must precede -i): a dropped stream re-dials.
-        "-reconnect", "1", "-reconnect_streamed", "1", "-reconnect_delay_max", "5",
+        *reconnect,
         "-i", url,
         "-t", str(secs),
         "-ac", str(CHANNELS), "-ar", str(SR), "-c:a", "pcm_s16le",

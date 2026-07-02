@@ -18,10 +18,11 @@
 #   make package   track -> social-ready bundle:     make package TRACK=out/heist.wav [TITLE="Heist"] [LINK=https://...] [SUBSTRATE=sound]
 #   make broadcast AETHER live radio (segmented-NRT -> live HLS):  make broadcast [SOURCE=out/tuned/x.wav] [SEGMENTS=0] [SECONDS=..] [SEED=1] [PERIOD=12]
 #   make rebroadcast push the stream to YouTube/Twitch (RTMP lure):  make rebroadcast TARGET=youtube (key via env RTMP_KEY) | make rebroadcast DRYRUN=out/preview.flv
+#   make submit    Ω feed the organism (a creature eats it live):  make submit URL=https://host/stream [LICENSE=cc0]  (also POST /submit on the live host; add OUROBOROS=1 to `make broadcast`)
 #   make demucs    install TRUE separation (htdemucs) for higher-quality rips
 #   make video     install headless video export (puppeteer) for videotrack
 
-.PHONY: help smoke dist serve validate clean stations tune rip forge render track stemtrack videotrack package broadcast rebroadcast demucs video
+.PHONY: help smoke dist serve validate clean stations tune rip forge render track stemtrack videotrack package broadcast rebroadcast submit demucs video
 
 help:
 	@grep -E '^#   make ' Makefile | sed 's/^#   /  /'
@@ -122,7 +123,15 @@ broadcast:
 	bash tools/broadcast.sh \
 		$(if $(SOURCE),--source "$(SOURCE)",) $(if $(SEGMENTS),--segments $(SEGMENTS),) \
 		$(if $(SECONDS),--seconds $(SECONDS),) $(if $(SEED),--seed $(SEED),) \
-		$(if $(PERIOD),--period $(PERIOD),) $(if $(OUT),--out "$(OUT)",)
+		$(if $(PERIOD),--period $(PERIOD),) $(if $(OUT),--out "$(OUT)",) \
+		$(if $(OUROBOROS),--ouroboros,)
+
+# submit: the Ω "feed the organism" enqueue — a stream URL a creature eats live.
+# (Also exposed over HTTP as POST /submit on the live host.) URL required.
+submit:
+	@test -n "$(URL)" || { echo "usage: make submit URL=https://host/stream [LICENSE=cc0] [OUT=out/live]"; exit 1; }
+	python3 tools/ingest_queue.py add --url "$(URL)" $(if $(LICENSE),--license $(LICENSE),) \
+		--dir "$(if $(OUT),$(OUT),out/live)/queue"
 
 # rebroadcast: the "Reach" lure — push the sovereign stream to YouTube/Twitch over
 # RTMP (ffmpeg synthesizes a visualizer video from the audio). The stream key is

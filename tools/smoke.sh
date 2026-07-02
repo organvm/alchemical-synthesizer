@@ -133,6 +133,13 @@ if command -v python3 >/dev/null 2>&1; then
   if [ -f tools/hls_append.py ]; then
     if python3 tools/hls_append.py --self-test >/tmp/brahma_hls.log 2>&1; then ok "hls_append.py --self-test"; else bad "hls_append.py --self-test"; tail -8 /tmp/brahma_hls.log; fi
   fi
+  # AETHER Ω (Ouroboros): the submission queue + the lineage ledger authorities.
+  if [ -f tools/ingest_queue.py ]; then
+    if python3 tools/ingest_queue.py --self-test >/tmp/brahma_q.log 2>&1; then ok "ingest_queue.py --self-test"; else bad "ingest_queue.py --self-test"; tail -8 /tmp/brahma_q.log; fi
+  fi
+  if [ -f tools/lineage.py ]; then
+    if python3 tools/lineage.py --self-test >/tmp/brahma_lin.log 2>&1; then ok "lineage.py --self-test"; else bad "lineage.py --self-test"; tail -8 /tmp/brahma_lin.log; fi
+  fi
   # AETHER source registry: must parse, and EVERY station must carry a license
   # (a source with no license tag could silently slip the publish-safety guard).
   if [ -f stations.json ]; then
@@ -198,6 +205,22 @@ done
 [ -f brahma/web/public/aether/aether.js ] && ok "exists: brahma/web/public/aether/aether.js" || bad "missing: brahma/web/public/aether/aether.js"
 # AETHER playable instrument (tracker-brained, Ableton-bodied).
 [ -f brahma/web/public/instrument/index.html ] && ok "exists: brahma/web/public/instrument/index.html" || bad "missing: brahma/web/public/instrument/index.html"
+# AETHER Ω integration: seed a submission (a local donor), run a short broadcast
+# with --ouroboros, and assert the lineage ledger records the absorption. Proves
+# the whole consume-you-back wire (queue pop -> tune -> render -> lineage).
+if command -v ffmpeg >/dev/null 2>&1 && command -v python3 >/dev/null 2>&1 \
+   && [ -f tools/broadcast.sh ] && [ -f tools/ingest_queue.py ]; then
+  OB="$(mktemp -d)"; OBLIVE="$OB/live"
+  ffmpeg -hide_banner -loglevel error -y -f lavfi -i "sine=frequency=330:duration=2" -ac 2 -ar 44100 "$OB/donor.wav" >/dev/null 2>&1
+  python3 tools/ingest_queue.py add --url "$OB/donor.wav" --license cc0 --dir "$OBLIVE/queue" >/dev/null 2>&1
+  bash tools/broadcast.sh --out "$OBLIVE" --submit-dir "$OBLIVE/queue" --ouroboros --segments 3 --seconds 1 --list-size 3 >/tmp/brahma_ob.log 2>&1
+  if [ -f "$OBLIVE/lineage.json" ] && python3 -c 'import json,sys; d=json.load(open("'"$OBLIVE"'/lineage.json")); sys.exit(0 if d.get("entries") else 1)' >/dev/null 2>&1; then
+    ok "Ouroboros: submission absorbed + lineage recorded"
+  else
+    bad "Ouroboros integration (see /tmp/brahma_ob.log)"; tail -5 /tmp/brahma_ob.log
+  fi
+  rm -rf "$OB"
+fi
 
 echo
 echo "=== Summary: ${PASS} passed, ${FAIL} failed, ${SKIP} skipped ==="

@@ -55,6 +55,18 @@
         .provisional { margin-top: 14px; color: var(--warn); font-size: 11px; border-top: 1px dashed var(--line); padding-top: 10px; }
         .lineage { margin-top: 16px; color: var(--dim); font-size: 11px; }
         .lineage b { color: var(--ink); font-weight: normal; }
+        .ouroboros { border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-top: 20px; background: #060a18; }
+        .ouroboros h2 { font-size: 16px; margin: 0 0 4px; }
+        .ob-sub { color: var(--dim); font-size: 12px; margin: 0 0 12px; }
+        #ob-form { display: flex; gap: 8px; flex-wrap: wrap; }
+        #ob-url { flex: 1; min-width: 200px; background: #0a0f22; border: 1px solid var(--line); color: var(--ink); padding: 9px 12px; border-radius: 8px; font-size: 13px; }
+        #ob-license { background: #0a0f22; border: 1px solid var(--line); color: var(--ink); padding: 9px; border-radius: 8px; font-size: 12px; }
+        #ob-form button { background: var(--dispersal); color: #1a0410; border: 0; padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        #ob-form button:hover { filter: brightness(1.1); }
+        .ob-msg { color: var(--dim); font-size: 12px; margin-top: 10px; min-height: 15px; }
+        .chain { margin-top: 14px; font-size: 11px; color: var(--dim); line-height: 1.9; }
+        .chain .lk { color: var(--ink); }
+        .chain .self { color: var(--dispersal); }
         footer { margin-top: 30px; color: var(--dim); font-size: 11px; line-height: 1.7; }
         a { color: var(--accent); }
     </style>
@@ -95,6 +107,26 @@
         </div>
 
         <div class="lineage" id="lineage"></div>
+    </section>
+
+    <!-- Ω · Ouroboros: feed the organism; watch the lineage grow -->
+    <section class="ouroboros" id="ouroboros">
+        <h2>Ω · feed the organism</h2>
+        <p class="ob-sub">Submit a stream URL and a creature will eat it live — output re-enters as input.
+        Only publish-safe sources are cleared for the archive; rights posture stays yours.</p>
+        <form id="ob-form">
+            <input type="url" id="ob-url" placeholder="https://host/stream" required>
+            <select id="ob-license" title="the source's license (recorded, not clearance)">
+                <option value="cc0">CC0</option>
+                <option value="public-domain">public domain</option>
+                <option value="cc-by">CC-BY</option>
+                <option value="own">my own</option>
+                <option value="unknown">unknown (R&amp;D)</option>
+            </select>
+            <button type="submit">feed ⟳</button>
+        </form>
+        <div class="ob-msg" id="ob-msg"></div>
+        <div class="chain" id="chain"></div>
     </section>
 
     <footer>
