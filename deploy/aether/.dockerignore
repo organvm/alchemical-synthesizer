@@ -1,0 +1,11 @@
+# Build context is the repo root; keep the image lean and the build fast.
+.git
+**/node_modules
+out/
+dist/
+forge/
+data/
+.venv-demucs/
+**/*.log
+.claude/
+.DS_Store

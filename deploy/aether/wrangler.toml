@@ -1,0 +1,39 @@
+# ============================================================================
+#  wrangler.toml — Cloudflare Containers deploy for the AETHER 24/7 radio.
+# ----------------------------------------------------------------------------
+#  Deploying this needs Workers Paid ($5/mo) — the human-gated lever
+#  L-MEDIA-ARK-HOST. See README.md for the one-command deploy + gated atoms.
+#
+#  NOTE on build context: the Dockerfile COPYs repo-relative paths (tools/,
+#  brahma/web/...), so it must build from the REPOSITORY ROOT. If your wrangler
+#  version builds the image with this file's directory as context, build+push
+#  the image yourself (README.md) and replace `image` with the registry tag.
+# ============================================================================
+name = "aether-radio"
+main = "worker.mjs"
+compatibility_date = "2026-01-01"
+
+# The container: the live generator + stream server (deploy/aether/Dockerfile).
+[[containers]]
+class_name = "AetherContainer"
+image = "../../Dockerfile"      # see README: build context = repo root
+max_instances = 1
+instance_type = "basic"
+
+# The Durable Object that owns the container instance.
+[[durable_objects.bindings]]
+name = "AETHER_CONTAINER"
+class_name = "AetherContainer"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["AetherContainer"]
+
+# R2: durable, CDN-fronted segment store ("R2 for segments"). Create the bucket
+# once: `wrangler r2 bucket create aether-segments`.
+[[r2_buckets]]
+binding = "SEGMENTS"
+bucket_name = "aether-segments"
+
+[observability]
+enabled = true
