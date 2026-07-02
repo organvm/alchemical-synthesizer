@@ -66,6 +66,10 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
 > the Forge, and **broadcasts** its own generative, evolving stream — whose home
 > page *is* the funnel (live player + demand capture + the packaged-track archive).
 
+> **Full plan (all paths, to the omega):** [`docs/AETHER-BROADCAST-PLAN.md`](docs/AETHER-BROADCAST-PLAN.md)
+> — grounded in the genesis design corpus (`docs/logos/*`, `docs/design/*`) and an excavation of
+> deployed streaming machinery across the ecosystem (converge, don't rebuild).
+
 - [x] **Listen** — sample live/free web audio (internet-radio streams +
       public-domain / CC0 archives) into a Forge-ready WAV. `tools/tune.py` +
       `stations.json` (a license-tagged source registry) + `make tune`/`make
@@ -76,18 +80,31 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
       stream → SPECIMEN VIABLE through `validate_audio.py`, flows into `make
       rip`/`make track`. Rights posture stays human-gated — the tool records the
       license, it does not grant clearance.*
-- [ ] **Broadcast (local)** — a continuous *generative* Brahma performance
-      (audio that evolves + folds in freshly-sampled material) rendered with the
-      live Etz Chaim visuals to a **local** stream endpoint (HLS/Icecast), proven
-      end-to-end. Going public is the deploy gate.
-- [ ] **Home = live player + funnel** — the landing page becomes Brahma's radio
-      station: a live player at the top, the packaged-track archive below, real
-      audio served at `/api/v1/specimens/:id/audio` (wire the `501` stub at
-      `product/src/api/rest.js:65`), and the existing waitlist capture
-      (`POST /api/v1/waitlist`). Capture demand first; no payment rail until a
-      real buyer exists. Deploy the static surface (sovereign rail — self-hosted
-      Icecast/Owncast — over a rented platform; social platforms are re-broadcast
-      lures, not the home).
+- [ ] **Broadcast (local)** — *[increment 1]* a continuous *generative* Brahma
+      performance: the Host-Body chassis runs the Cell-Cycle/METABOLISM organism
+      (param drift + folded-in `tune` captures) → **segmented-NRT** A/V (reusing
+      `bounce.sh` / `stemforge.py` / `render_video.mjs`) → **live-HLS** (flip
+      etceter4's `transcode-video.js` from `vod` to `event`/rolling) → grafted
+      **theatron** HLS player, proven end-to-end **locally**. Coherence/Entropy
+      labeled provisional. Going public is the deploy gate.
+- [ ] **Home = live player + funnel** — *[increment 2]* the landing page becomes
+      Brahma's radio station: live player on top, packaged-track archive below,
+      real audio at `product/src/api/rest.js:65` (wire the `501` stub), existing
+      waitlist (`POST /api/v1/waitlist`). Deploy the static surface (CF Pages /
+      Vercel). Capture demand first; no payment rail until a real buyer exists.
+- [ ] **24/7 sovereign host** — *[increment 3]* move the generator into a CF
+      Container (media-ark's `Dockerfile` + `wrangler containers` pattern, R2 for
+      segments). Gated on the $5/mo Workers-Paid lever `L-MEDIA-ARK-HOST`.
+- [ ] **Playable / realtime** — *[increment 4]* the "mess around with it live"
+      path: realtime scsynth capture + the audio-orb 3D reactive surface + the
+      tracker-brained/Ableton-bodied sampler instrument (graft
+      `docs/absorb-alchemize/synth-drum-machine.tsx`).
+- [ ] **Reach** — *[increment 5]* RTMP re-broadcast lure to YouTube/Twitch
+      (converge the livestream-framework CDN sink). The sovereign HLS stream stays
+      the home.
+- [ ] **Ω — Ouroboros** — *[increment 6]* viewers submit a stream URL → a creature
+      eats it live; a lineage browser; the "consume you back" loop; then
+      substrate-agnostic (absorb non-audio). *"Output re-enters as input."*
 
 **Human-gated decision atoms** (do not silently decide):
 - **Rights posture** — commercially sampling copyrighted songs *or radio/stream
