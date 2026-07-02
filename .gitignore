@@ -27,5 +27,14 @@ dist/
 *.scx
 synthdefs/
 
+# Forge pipeline outputs (stems, recipes, rendered tracks) + demucs env
+forge/
+out/
+.venv-demucs/
+
+# Python
+__pycache__/
+*.pyc
+
 # Override global gitignore's `public/` rule (Gatsby)
 !brahma/web/public/

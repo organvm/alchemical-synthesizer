@@ -1,33 +1,94 @@
 /*
-  Phase 13: Non-Real-Time (NRT) Rendering for Specimen Generation
+  Phase 13: Non-Real-Time (NRT) Rendering — Specimen / Track Bounce
+
+  The headless spine: fed a WAV ("the food"), Brahma re-expresses it and writes
+  a new WAV ("the result") with NO audio device and NO GUI — via scsynth -N
+  (Score.recordNRT). This is what turns "make a track" into one command
+  (tools/bounce.sh -> `make render`).
+
+  Self-contained by design: it defines its OWN forge voice (Mnemosyne tape aging
+  + light transmutation) and ships it into the NRT server as a \d_recv bundle, so
+  a render works without booting the full 317-SynthDef rack. Richer creature
+  chains (Relinquished, Proteus) can be swapped into `forgeDef` as they are made
+  NRT-safe.
+
+  Driven from sclang (see tools/bounce.sh):
+    Server.program = "/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth";
+    "brahma/sc/13_nrt_renderer.scd".load;
+    ~nrt_renderer.renderSpecimen("/path/in.wav", "/path/out.wav", 12.0, true);
 */
 
 (
 ~nrt_renderer = (
 
-    // Render a "Specimen" to disk
-    // Input: A 10-second audio file (The "Food")
-    // Process: Fed through Relinquished -> Transmuted
-    // Output: A new WAV file (The "Result")
+    // The offline forge voice. Fixed 2-channel input (bounce.sh normalizes to
+    // stereo). Returns the SynthDef so renderSpecimen can \d_recv it.
+    forgeDef: {
+        SynthDef(\brahma_forge_voice, { |buf = 0, dur = 10, amp = 0.9,
+                                         age = 0.35, erosion = 0.2, drive = 0.35|
+            var sig, rate, wow, flutter, dust, env, core;
+            // Tape mechanics (Mnemosyne): wow + flutter modulate playback rate.
+            wow     = LFNoise2.kr(0.5).bipolar(age * 0.05);
+            flutter = LFNoise1.kr(10).bipolar(age * 0.02);
+            rate    = BufRateScale.kr(buf) * (1.0 + wow + flutter);
 
-    renderSpecimen: { |self, inputPath, outputPath|
-        var score, buf;
+            sig  = PlayBuf.ar(2, buf, rate, loop: 0, doneAction: 2);
+            core = (sig[0] + sig[1]) * 0.5;                 // fold to mono core
+
+            // Erosion (HF loss) + saturation (transmutation).
+            core = LPF.ar(core, 18000 - (erosion * 15000));
+            core = tanh(core * (1 + (drive * 4)));
+
+            dust = Dust2.ar(age * 10) * 0.05;               // crackle
+            env  = EnvGen.kr(Env.linen(0.05, (dur - 0.3).max(0.1), 0.25));
+            core = (core + dust) * env * amp;
+
+            Out.ar(0, [core, core]);                        // stereo bounce
+        });
+    },
+
+    // inputPath   : a stereo 44.1k WAV (bounce.sh guarantees this)
+    // outputPath  : destination WAV
+    // duration    : render length in seconds
+    // exitWhenDone: call 0.exit when the render finishes (for headless sclang)
+    renderSpecimen: { |self, inputPath, outputPath, duration = 12.0, exitWhenDone = false|
+        var def, score, opts, osc;
+
+        def = self.forgeDef.();
+        osc = outputPath ++ ".osc";                          // scratch command file
 
         score = Score([
-            [0.0, [\b_allocRead, 0, inputPath]],
-            [0.0, [\s_new, \relinquished_ia, 1000, 0, 0, \inBusA, 0]],
-            [0.0, [\s_new, \relinquished_bc, 1001, 0, 0, \inBus, 0]],
-            [10.0, [\c_set, 0, 0]] // Finish
+            [0.0, [\d_recv, def.asBytes]],                   // ship the SynthDef offline
+            [0.0, [\b_allocRead, 0, inputPath, 0, 0]],       // load the food into buffer 0
+            [0.0, [\s_new, \brahma_forge_voice, 1000, 0, 0,  // start the voice
+                   \buf, 0, \dur, duration]],
+            [duration + 0.5, [\c_set, 0, 0]]                 // tail marker
         ]);
 
-        // This requires the 'nrt' server option configuration in real usage
-        "NRT Render requested for: ".postln;
-        ("Input: " ++ inputPath).postln;
-        ("Output: " ++ outputPath).postln;
+        opts = ServerOptions.new
+            .numOutputBusChannels_(2)
+            .numInputBusChannels_(0)
+            .sampleRate_(44100);
 
-        // Score.recordNRT(...) would go here
+        ("NRT render: " ++ inputPath ++ " -> " ++ outputPath
+            ++ " (" ++ duration ++ "s)").postln;
+
+        score.recordNRT(
+            oscFilePath: osc,
+            outputFilePath: outputPath,
+            sampleRate: 44100,
+            headerFormat: "WAV",
+            sampleFormat: "int16",
+            options: opts,
+            duration: duration + 0.6,
+            action: {
+                ("NRT render complete -> " ++ outputPath).postln;
+                if(exitWhenDone) { 0.exit(0) };
+            }
+        );
+        outputPath
     }
 );
 
-"--- BRAHMA: NRT Renderer Loaded ---".postln;
+"--- BRAHMA: NRT Renderer Loaded (headless bounce ready) ---".postln;
 )
