@@ -57,7 +57,8 @@ fi
 
 echo "=== [3/6] JS syntax (node --check) ==="
 if command -v node >/dev/null 2>&1; then
-  for js in brahma/web/server.js brahma/web/public/sketch.js; do
+  for js in brahma/web/server.js brahma/web/public/sketch.js \
+            brahma/web/public/tree/video.js tools/render_video.mjs; do
     if node --check "$js" >/dev/null 2>&1; then ok "node --check $js"; else bad "node --check $js"; fi
   done
 else
@@ -112,20 +113,22 @@ fi
 
 echo "=== [6/6] Forge tools syntax (py_compile + bash -n) ==="
 if command -v python3 >/dev/null 2>&1; then
-  for py in tools/rip.py tools/stemforge.py tools/validate_audio.py tools/gen_test_tone.py; do
+  for py in tools/rip.py tools/stemforge.py tools/analyze_audio.py tools/validate_audio.py tools/gen_test_tone.py; do
     [ -f "$py" ] || continue
     if python3 -m py_compile "$py" >/tmp/brahma_pyc.log 2>&1; then ok "py_compile $py"; else bad "py_compile $py (see /tmp/brahma_pyc.log)"; tail -5 /tmp/brahma_pyc.log; fi
   done
 else
   skip "python3 not installed — Forge py syntax"
 fi
-for sh in tools/forge.sh tools/bounce.sh tools/ingest.sh tools/setup-demucs.sh tools/smoke.sh; do
+for sh in tools/forge.sh tools/bounce.sh tools/ingest.sh tools/setup-demucs.sh \
+          tools/videotrack.sh tools/setup-video.sh tools/smoke.sh; do
   [ -f "$sh" ] || continue
   if bash -n "$sh" >/dev/null 2>&1; then ok "bash -n $sh"; else bad "bash -n $sh"; fi
 done
 for scd in brahma/sc/13_nrt_renderer.scd brahma/sc/14_stem_voices.scd; do
   [ -f "$scd" ] && ok "exists: $scd" || bad "missing: $scd"
 done
+[ -f brahma/web/public/tree/video.js ] && ok "exists: brahma/web/public/tree/video.js" || bad "missing: brahma/web/public/tree/video.js"
 
 echo
 echo "=== Summary: ${PASS} passed, ${FAIL} failed, ${SKIP} skipped ==="

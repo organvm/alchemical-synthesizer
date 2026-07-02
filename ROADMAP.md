@@ -42,9 +42,15 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
       that sums the voices under a master limiter, instead of a single premix
       (`tools/stemforge.py` + `brahma/sc/14_stem_voices.scd`; `make stemtrack`,
       per-stem `--map`). *The "supremely powerful modular" render. Verified on-machine.*
-- [ ] **Matching visual** — audio-reactive video export from the Etz Chaim Visual
-      Cortex (`brahma/web`): MediaRecorder capture driven by the render's OSC trace,
-      then ffmpeg-mux to the track. (`tools/package.sh`)
+- [x] **Matching visual** — audio-reactive video export from the Etz Chaim Visual
+      Cortex (`brahma/web`). A track's audio is analyzed into a per-frame envelope
+      (`tools/analyze_audio.py`: RMS + log-spaced spectral bands + flatness + onsets,
+      stdlib + ffmpeg), which drives the real p5 sketch headlessly frame-by-frame
+      (`tools/render_video.mjs` via puppeteer; `tree/video.js` maps bands→vessels
+      bass-to-crown, loudness→gain, flatness→entropy, onsets→Lightning Flash, with a
+      deterministic frame-clock override of `millis()`), then ffmpeg muxes frames +
+      audio into a post-ready mp4. `make videotrack TRACK=out/x.wav` (setup once via
+      `make video`). *Composes with `make track`/`make stemtrack`.*
 - [ ] **Package** — one social-ready asset per track: mux audio+video, cover PNG,
       "made with Brahma" attribution + short link.
 - [ ] **Funnel** — serve real audio at `/api/v1/specimens/:id/audio`, a track
