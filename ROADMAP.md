@@ -113,9 +113,20 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
       stream/Range/409/404); live boot serves `/`, its assets, `/pricing`,
       `/dashboard`, `/live`, and `/api/v1/specimens` all 200.* The first public
       **deploy** stays the human-gated atom; no payment rail until a real buyer.
-- [ ] **24/7 sovereign host** — *[increment 3]* move the generator into a CF
-      Container (media-ark's `Dockerfile` + `wrangler containers` pattern, R2 for
-      segments). Gated on the $5/mo Workers-Paid lever `L-MEDIA-ARK-HOST`.
+- [x] **24/7 sovereign host** — *[increment 3]* the generator is containerized as
+      a complete Cloudflare Containers deploy unit (`deploy/aether/`): a
+      `Dockerfile` (ffmpeg + python3 + node, **no** SuperCollider — the fallback
+      tiers keep it live, so the image is small/reliable) runs `broadcast.sh` +
+      a **dependency-free** `serve.js` (node builtins only — no `npm install`, no
+      native builds); a `worker.mjs` fronts the container and serves durable
+      segments from **R2** (`tools/r2_sync.sh` is the container→R2 write path,
+      creds via env, never recited); `wrangler.toml` wires the container + DO +
+      R2 bucket. *Verified: `serve.js` serves player + `/live` on-machine
+      (correct MIME/no-cache, traversal blocked); `wrangler.toml` valid TOML,
+      `worker.mjs`/`serve.js` parse, `entrypoint.sh`/`r2_sync.sh` `bash -n` clean
+      — all in smoke.* Human-gated atoms (each one action, in `README.md`):
+      `L-MEDIA-ARK-HOST` ($5/mo Workers Paid), `wrangler login`, `r2 bucket
+      create`, `wrangler deploy`; optional R2 write creds.
 - [ ] **Playable / realtime** — *[increment 4]* the "mess around with it live"
       path: realtime scsynth capture + the audio-orb 3D reactive surface + the
       tracker-brained/Ableton-bodied sampler instrument (graft

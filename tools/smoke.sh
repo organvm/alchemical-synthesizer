@@ -59,7 +59,8 @@ echo "=== [3/6] JS syntax (node --check) ==="
 if command -v node >/dev/null 2>&1; then
   for js in brahma/web/server.js brahma/web/public/sketch.js \
             brahma/web/public/tree/video.js brahma/web/public/aether/aether.js \
-            tools/render_video.mjs; do
+            deploy/aether/serve.js deploy/aether/worker.mjs tools/render_video.mjs; do
+    [ -f "$js" ] || continue
     if node --check "$js" >/dev/null 2>&1; then ok "node --check $js"; else bad "node --check $js"; fi
   done
 else
@@ -142,10 +143,28 @@ else
   skip "python3 not installed — Forge py syntax"
 fi
 for sh in tools/forge.sh tools/bounce.sh tools/ingest.sh tools/setup-demucs.sh \
-          tools/videotrack.sh tools/setup-video.sh tools/package.sh tools/broadcast.sh tools/smoke.sh; do
+          tools/videotrack.sh tools/setup-video.sh tools/package.sh tools/broadcast.sh \
+          tools/r2_sync.sh deploy/aether/entrypoint.sh tools/smoke.sh; do
   [ -f "$sh" ] || continue
   if bash -n "$sh" >/dev/null 2>&1; then ok "bash -n $sh"; else bad "bash -n $sh"; fi
 done
+# AETHER 24/7 sovereign host (deploy/aether): the container deploy unit must be
+# structurally sound even though the image build + wrangler deploy are gated.
+if [ -f deploy/aether/wrangler.toml ] && command -v python3 >/dev/null 2>&1; then
+  if python3 -c 'import tomllib,sys; d=tomllib.load(open("deploy/aether/wrangler.toml","rb")); sys.exit(0 if d.get("name") and d.get("containers") and d.get("r2_buckets") else 1)' >/dev/null 2>&1; then
+    ok "deploy/aether/wrangler.toml valid (name + containers + r2_buckets)"
+  else
+    bad "deploy/aether/wrangler.toml malformed or missing containers/r2_buckets"
+  fi
+fi
+if [ -f deploy/aether/Dockerfile ]; then
+  if grep -q '^FROM ' deploy/aether/Dockerfile && grep -q '^ENTRYPOINT' deploy/aether/Dockerfile; then
+    ok "deploy/aether/Dockerfile has FROM + ENTRYPOINT"
+  else
+    bad "deploy/aether/Dockerfile missing FROM or ENTRYPOINT"
+  fi
+fi
+[ -f deploy/aether/README.md ] && ok "exists: deploy/aether/README.md" || bad "missing: deploy/aether/README.md"
 for scd in brahma/sc/13_nrt_renderer.scd brahma/sc/14_stem_voices.scd; do
   [ -f "$scd" ] && ok "exists: $scd" || bad "missing: $scd"
 done
