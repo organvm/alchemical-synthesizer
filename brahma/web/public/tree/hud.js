@@ -27,6 +27,33 @@ const Hud = (() => {
         pop();
     }
 
+    // The maker's signature for packaged/exported clips: a subtle "made with
+    // Brahma" wordmark (bottom-right) and, if given, the track title (top-left).
+    // Drawn twice — a dark shadow then a light face — so it reads over both the
+    // dark void and bright vessels. Sizes scale with the canvas so it looks the
+    // same at 1080² or 4K. Distinct from drawTitle (the dev header) by design.
+    function drawAttribution(title) {
+        push();
+        const s = Math.max(0.5, width / 1080);
+        noStroke();
+
+        const mark = "✦ made with Brahma";
+        textAlign(RIGHT, BOTTOM);
+        textSize(15 * s);
+        const mx = width - 22 * s, my = height - 20 * s;
+        fill(0, 0, 0, 150);          text(mark, mx + 1.5 * s, my + 1.5 * s);
+        fill(255, 244, 214, 214);    text(mark, mx, my);
+
+        if (title) {
+            textAlign(LEFT, TOP);
+            textSize(24 * s);
+            const tx = 26 * s, ty = 24 * s;
+            fill(0, 0, 0, 150);      text(title, tx + 1.5 * s, ty + 1.5 * s);
+            fill(255, 255, 255, 236); text(title, tx, ty);
+        }
+        pop();
+    }
+
     // The substrate selector + the four trait-axes of the tuned reality.
     function drawSubstrate(list, active, axisVals) {
         push();
@@ -174,5 +201,5 @@ const Hud = (() => {
         return p === "left" ? "Severity" : p === "right" ? "Mercy" : "Mildness";
     }
 
-    return { drawTitle, drawSubstrate, drawStatus, drawHelp, drawTooltip };
+    return { drawTitle, drawAttribution, drawSubstrate, drawStatus, drawHelp, drawTooltip };
 })();

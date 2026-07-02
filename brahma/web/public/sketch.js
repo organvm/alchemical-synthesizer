@@ -189,6 +189,13 @@ function draw() {
         Hud.drawTooltip(hovered);
         Hud.drawHelp(settings.showHelp);
     }
+
+    // --- Maker's mark ----------------------------------------------------
+    // Drawn outside the HUD gate: a packaged export shows "made with Brahma"
+    // (+ the track title) even though the dev overlay above is suppressed.
+    if (Video.isActive() && Video.wantAttribution()) {
+        Hud.drawAttribution(Video.title());
+    }
 }
 
 function systemStats() {

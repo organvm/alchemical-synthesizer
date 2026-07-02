@@ -31,6 +31,10 @@ const Video = (() => {
     function frameCount() { return active ? cfg.env.length : 0; }
     function currentFrame() { return frame; }
     function wantHud() { return !!(cfg && cfg.hud); }
+    // Packaged exports carry a "made with Brahma" mark (+ optional track title);
+    // raw videotrack renders leave the cosmos bare.
+    function wantAttribution() { return !!(cfg && cfg.attribution); }
+    function title() { return (cfg && cfg.title) || ""; }
     function dims() {
         return { w: (cfg && cfg.width) || 1080, h: (cfg && cfg.height) || 1080 };
     }
@@ -96,6 +100,7 @@ const Video = (() => {
 
     return {
         isActive, fps, frameCount, currentFrame, wantHud,
+        wantAttribution, title,
         dims, setFrame, installClock, apply,
     };
 })();

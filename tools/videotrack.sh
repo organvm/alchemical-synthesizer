@@ -9,6 +9,11 @@
 #                [--fps 30] [--width 1080] [--height 1080]
 #                [--substrate sound|idea|product|cosmos] [--bands 12]
 #                [--hud] [--keep-frames]
+#                [--attribution] [--title "Heist"] [--cover out/heist.cover.png]
+#
+# --attribution/--title burn a "made with Brahma" mark (+ title) into the clip;
+# --cover writes the track's most energetic frame out as a still. (tools/package.sh
+# wires these into a post-ready bundle.)
 #
 # Pipeline:  analyze_audio.py  ->  render_video.mjs (puppeteer)  ->  ffmpeg mux
 # Exit: 0 ok · 2 usage · 3 missing tool (ffmpeg/node/puppeteer) · 1 render/mux fail
@@ -19,6 +24,7 @@ cd "$HERE"
 
 TRACK=""; OUT=""; FPS=30; WIDTH=1080; HEIGHT=1080
 SUBSTRATE="sound"; BANDS=12; HUD=0; KEEP=0
+COVER=""; TITLE=""; ATTR=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --track)     TRACK="$2"; shift 2;;
@@ -30,6 +36,9 @@ while [ $# -gt 0 ]; do
     --bands)     BANDS="$2"; shift 2;;
     --hud)       HUD=1; shift;;
     --keep-frames) KEEP=1; shift;;
+    --cover)     COVER="$2"; shift 2;;
+    --title)     TITLE="$2"; shift 2;;
+    --attribution) ATTR=1; shift;;
     *) echo "videotrack: unknown arg $1" >&2; exit 2;;
   esac
 done
@@ -71,9 +80,15 @@ echo "videotrack: analyzing $TRACK (${FPS}fps, ${BANDS} bands)" >&2
 "$PYTHON" tools/analyze_audio.py "$TRACK" --out "$env" --fps "$FPS" --bands "$BANDS"
 
 echo "videotrack: rendering cosmos ${WIDTH}x${HEIGHT} (substrate=$SUBSTRATE)" >&2
-hud_flag=""; [ "$HUD" = "1" ] && hud_flag="--hud"
+# Build render flags as an array. Guard the expansion — on macOS bash 3.2,
+# "${arr[@]}" over an empty array trips `set -u` ("unbound variable").
+render_flags=()
+[ "$HUD" = "1" ]  && render_flags+=(--hud)
+[ "$ATTR" = "1" ] && render_flags+=(--attribution)
+[ -n "$TITLE" ]   && render_flags+=(--title "$TITLE")
 "$NODE" tools/render_video.mjs --env "$env" --frames "$frames" \
-  --width "$WIDTH" --height "$HEIGHT" --fps "$FPS" --substrate "$SUBSTRATE" $hud_flag
+  --width "$WIDTH" --height "$HEIGHT" --fps "$FPS" --substrate "$SUBSTRATE" \
+  ${render_flags[@]+"${render_flags[@]}"}
 
 echo "videotrack: muxing frames + audio -> $OUT" >&2
 "$FFMPEG" -hide_banner -loglevel error -y \
@@ -91,4 +106,20 @@ if [ "$vstreams" -lt 1 ] || [ "$astreams" -lt 1 ]; then
   echo "videotrack: FAILED — output missing video ($vstreams) or audio ($astreams) stream" >&2; exit 1
 fi
 echo "videotrack: OK -> $OUT (${dur}s, ${WIDTH}x${HEIGHT}@${FPS}, video+audio)"
+
+# --- optional cover still: the track's most energetic frame -------------------
+# Chosen by peak RMS from the same envelope that drove the render, so the cover
+# is literally the video's loudest moment (attribution mark already on it). Must
+# run before the EXIT trap reaps $work.
+if [ -n "$COVER" ]; then
+  peak="$("$PYTHON" -c 'import json,sys; e=json.load(open(sys.argv[1])).get("env",[]); print(max(range(len(e)), key=lambda i: e[i].get("rms",0)) if e else 0)' "$env")"
+  src="$frames/frame_$(printf '%06d' "$peak").png"
+  if [ -f "$src" ]; then
+    mkdir -p "$(dirname "$COVER")"; cp "$src" "$COVER"
+    echo "videotrack: cover -> $COVER (peak-energy frame $peak)"
+  else
+    echo "videotrack: WARN cover frame missing ($src)" >&2
+  fi
+fi
+
 [ "$KEEP" = "1" ] && echo "videotrack: frames kept in $frames" >&2 || true

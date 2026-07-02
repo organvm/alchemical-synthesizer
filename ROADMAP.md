@@ -51,8 +51,15 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
       deterministic frame-clock override of `millis()`), then ffmpeg muxes frames +
       audio into a post-ready mp4. `make videotrack TRACK=out/x.wav` (setup once via
       `make video`). *Composes with `make track`/`make stemtrack`.*
-- [ ] **Package** — one social-ready asset per track: mux audio+video, cover PNG,
-      "made with Brahma" attribution + short link.
+- [x] **Package** — one command turns a track into a social-ready bundle in
+      `out/pkg/<base>/`: the audio-reactive `.mp4` with a "made with Brahma" mark
+      (+ track title) drawn *in p5* so it's deterministic (no ffmpeg font burn),
+      a `.cover.png` (the track's peak-energy frame, so the still can't drift from
+      the clip), and a paste-ready `.caption.txt` (title + attribution + link +
+      tags; set `$BRAHMA_LINK` to bake in the funnel URL). `make package
+      TRACK=out/x.wav [TITLE="…"] [LINK=…]` (`tools/package.sh` →
+      `videotrack.sh --attribution --title --cover`). *Composes with `make
+      track`/`make stemtrack`; verified on-machine.*
 - [ ] **Funnel** — serve real audio at `/api/v1/specimens/:id/audio`, a track
       landing page with the existing waitlist capture, deploy the static surface
       (capture demand first; no payment rail until a real buyer exists).

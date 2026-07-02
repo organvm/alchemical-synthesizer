@@ -121,7 +121,7 @@ else
   skip "python3 not installed — Forge py syntax"
 fi
 for sh in tools/forge.sh tools/bounce.sh tools/ingest.sh tools/setup-demucs.sh \
-          tools/videotrack.sh tools/setup-video.sh tools/smoke.sh; do
+          tools/videotrack.sh tools/setup-video.sh tools/package.sh tools/smoke.sh; do
   [ -f "$sh" ] || continue
   if bash -n "$sh" >/dev/null 2>&1; then ok "bash -n $sh"; else bad "bash -n $sh"; fi
 done
