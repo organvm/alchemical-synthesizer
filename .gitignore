@@ -43,5 +43,8 @@ out/
 __pycache__/
 *.pyc
 
+# Cloudflare wrangler local cache (account cache, dev state) — never track.
+.wrangler/
+
 # Override global gitignore's `public/` rule (Gatsby)
 !brahma/web/public/
