@@ -80,13 +80,25 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
       stream → SPECIMEN VIABLE through `validate_audio.py`, flows into `make
       rip`/`make track`. Rights posture stays human-gated — the tool records the
       license, it does not grant clearance.*
-- [ ] **Broadcast (local)** — *[increment 1]* a continuous *generative* Brahma
-      performance: the Host-Body chassis runs the Cell-Cycle/METABOLISM organism
-      (param drift + folded-in `tune` captures) → **segmented-NRT** A/V (reusing
-      `bounce.sh` / `stemforge.py` / `render_video.mjs`) → **live-HLS** (flip
-      etceter4's `transcode-video.js` from `vod` to `event`/rolling) → grafted
-      **theatron** HLS player, proven end-to-end **locally**. Coherence/Entropy
-      labeled provisional. Going public is the deploy gate.
+- [x] **Broadcast (local)** — *[increment 1]* a continuous *generative* Brahma
+      performance. `tools/cellcycle.py` is the **METABOLISM organism** (the one
+      genuinely new muscle): it carries state forward across segments and walks
+      the owner's own arc **READABLE → CLUSTER → DISPERSAL → rebirth** ("bulks up
+      then sheds"), emitting each segment's genome + **provisional**
+      coherence/entropy (honesty seam intact). `tools/broadcast.sh` renders each
+      segment in three graceful tiers — SuperCollider NRT re-expression when
+      present, else a folded `tune` donor, else a genome-reactive tone so the
+      stream never goes silent — and `tools/hls_append.py` rolls it into a
+      **LIVE HLS** playlist (the `vod → event`/rolling flip = no `#EXT-X-ENDLIST`
+      + rolling `#EXT-X-MEDIA-SEQUENCE` + chunk eviction). The grafted
+      **theatron** player (`brahma/web/public/aether/`, HLS.js + Safari-native
+      fallback) attaches at `/aether` and renders the organism's live inner life;
+      `server.js` serves it at `/live` (no-cache playlist, `video/mp2t` chunks)
+      and now survives an OSC-port conflict instead of crashing. `make broadcast`.
+      *Verified on-machine end-to-end with ffmpeg (real AAC/TS chunks, live
+      rolling window, eviction, media-sequence) + `cellcycle`/`hls_append`
+      self-tests in smoke; NRT path is SC-gated (SC not installed here, same as
+      `bounce.sh`). Going public is the deploy gate (increments 2–3).*
 - [ ] **Home = live player + funnel** — *[increment 2]* the landing page becomes
       Brahma's radio station: live player on top, packaged-track archive below,
       real audio at `product/src/api/rest.js:65` (wire the `501` stub), existing

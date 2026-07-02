@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brahma · AETHER — a living radio</title>
+    <!-- HLS.js, CDN-loaded (same idiom as the p5 CDN in the Visual Cortex).
+         Safari plays HLS natively; aether.js falls back to that when Hls is
+         unsupported. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
+    <style>
+        :root {
+            --bg: #02030a; --ink: #e8ecff; --dim: #7f88b8; --line: #1a2140;
+            --accent: #7ba7ff; --warn: #ffcf6b;
+            --readable: #6bd6ff; --cluster: #ffb86b; --dispersal: #ff6b9d;
+        }
+        * { font-family: "SF Mono", "JetBrains Mono", "Menlo", monospace; box-sizing: border-box; }
+        html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); }
+        .wrap { max-width: 860px; margin: 0 auto; padding: 28px 20px 60px; }
+        header { display: flex; align-items: baseline; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 14px; }
+        header h1 { font-size: 20px; margin: 0; letter-spacing: 1px; }
+        header .tag { color: var(--dim); font-size: 12px; }
+        .live { margin-left: auto; font-size: 12px; color: var(--dispersal); display: flex; align-items: center; gap: 6px; }
+        .live .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dispersal); animation: pulse 1.4s infinite; }
+        .live.off { color: var(--dim); } .live.off .dot { background: var(--dim); animation: none; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+        .player { margin: 20px 0; }
+        audio { width: 100%; }
+        .hint { color: var(--dim); font-size: 12px; margin-top: 8px; }
+
+        .organism { border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-top: 8px; background: #060a18; }
+        .row { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+        .badge { font-size: 13px; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--line); }
+        .badge.phase-readable { color: var(--readable); border-color: var(--readable); }
+        .badge.phase-cluster  { color: var(--cluster);  border-color: var(--cluster); }
+        .badge.phase-dispersal{ color: var(--dispersal);border-color: var(--dispersal); }
+        .creature { font-size: 15px; color: var(--accent); }
+        .epoch { color: var(--dim); font-size: 12px; }
+
+        .arc { display: flex; gap: 6px; margin: 16px 0 6px; }
+        .arc .seg { flex: 1; height: 4px; border-radius: 2px; background: var(--line); }
+        .arc .seg.readable { background: var(--readable); }
+        .arc .seg.cluster  { background: var(--cluster); }
+        .arc .seg.dispersal{ background: var(--dispersal); }
+        .arc .seg.on { box-shadow: 0 0 8px currentColor; }
+        .arc-labels { display: flex; justify-content: space-between; color: var(--dim); font-size: 10px; letter-spacing: 1px; }
+
+        .meters { margin-top: 18px; display: grid; grid-template-columns: 110px 1fr 44px; gap: 8px 12px; align-items: center; }
+        .meters .name { color: var(--dim); font-size: 12px; }
+        .bar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+        .bar > i { display: block; height: 100%; background: var(--accent); transition: width .4s ease; }
+        .val { text-align: right; font-size: 12px; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+        .provisional { margin-top: 14px; color: var(--warn); font-size: 11px; border-top: 1px dashed var(--line); padding-top: 10px; }
+        .lineage { margin-top: 16px; color: var(--dim); font-size: 11px; }
+        .lineage b { color: var(--ink); font-weight: normal; }
+        footer { margin-top: 30px; color: var(--dim); font-size: 11px; line-height: 1.7; }
+        a { color: var(--accent); }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header>
+        <h1>AETHER</h1>
+        <span class="tag">Brahma · a living radio — it listens, transmutes, broadcasts</span>
+        <span class="live off" id="liveflag"><span class="dot"></span><span id="livetext">offline</span></span>
+    </header>
+
+    <div class="player">
+        <audio id="audio" controls playsinline></audio>
+        <div class="hint" id="hint">Loading the stream…</div>
+    </div>
+
+    <section class="organism" id="organism">
+        <div class="row">
+            <span class="badge phase-readable" id="phase">—</span>
+            <span class="creature" id="creature">awaiting the organism</span>
+            <span class="epoch" id="epoch"></span>
+        </div>
+
+        <div class="arc" id="arc" title="the metabolic cycle: READABLE → CLUSTER → DISPERSAL → rebirth"></div>
+        <div class="arc-labels"><span>READABLE</span><span>CLUSTER</span><span>DISPERSAL</span></div>
+
+        <div class="meters">
+            <span class="name">coherence</span><div class="bar"><i id="bar-coherence"></i></div><span class="val" id="val-coherence">—</span>
+            <span class="name">fidelity</span> <div class="bar"><i id="bar-fidelity"></i></div> <span class="val" id="val-fidelity">—</span>
+            <span class="name">entropy</span>  <div class="bar"><i id="bar-entropy"></i></div>  <span class="val" id="val-entropy">—</span>
+            <span class="name">drift (FSAP)</span><div class="bar"><i id="bar-drift"></i></div><span class="val" id="val-drift">—</span>
+        </div>
+
+        <div class="provisional">
+            ⚠ coherence / fidelity / entropy are <b>provisional</b> indicators of an intended inner life —
+            not yet real measurements. The legible proof is the before/after specimen.
+        </div>
+
+        <div class="lineage" id="lineage"></div>
+    </section>
+
+    <footer>
+        <p>The stream is a <b>lineage, not a loop</b>: every performance is unrepeatable — power-up is amnesia,
+        power-down is death, a recording is a specimen that will never exist again.</p>
+        <p id="tier"></p>
+    </footer>
+</div>
+
+<script src="aether.js"></script>
+</body>
+</html>
