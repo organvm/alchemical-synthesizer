@@ -127,10 +127,20 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
       — all in smoke.* Human-gated atoms (each one action, in `README.md`):
       `L-MEDIA-ARK-HOST` ($5/mo Workers Paid), `wrangler login`, `r2 bucket
       create`, `wrangler deploy`; optional R2 write creds.
-- [ ] **Playable / realtime** — *[increment 4]* the "mess around with it live"
-      path: realtime scsynth capture + the audio-orb 3D reactive surface + the
-      tracker-brained/Ableton-bodied sampler instrument (graft
-      `docs/absorb-alchemize/synth-drum-machine.tsx`).
+- [x] **Playable / realtime** — *[increment 4]* the "mess around with it live"
+      surface (`brahma/web/public/instrument/`, at `/instrument`): a
+      **tracker-brained, Ableton-bodied** sampler instrument. `pattern.js` is the
+      backend-agnostic brain (node-tested): the per-cell command language
+      (`RT`/`ST`/`OV`/`HU`/`DN`), the owner's generative arc **READABLE → CLUSTER
+      → DISPERSAL** (same metabolism as `cellcycle.py`), and mutable `scene` vs
+      immutable `scene_version` (freeze a specimen). `instrument.js` is the
+      WebAudio body driving it through an **injectable render adapter** — a local
+      WebAudio synth **or** an `OSC → SuperCollider` adapter over the existing
+      Cortex bridge (control needs no device) — plus a live analyser "orb"
+      visual. *Verified: `pattern.js --self-test` (commands, arc, determinism,
+      scene_version) + `node --check` in smoke.* Device-gated extensions
+      (deferred): realtime scsynth **audio capture** (needs BlackHole/JACK) and a
+      full THREE.js 3D orb.
 - [ ] **Reach** — *[increment 5]* RTMP re-broadcast lure to YouTube/Twitch
       (converge the livestream-framework CDN sink). The sovereign HLS stream stays
       the home.
