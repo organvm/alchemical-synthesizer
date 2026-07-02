@@ -16,10 +16,11 @@
 #   make stemtrack per-stem modular render:         make stemtrack NAME=heist DRUMS=a/drums.wav MELODY=b/other.wav OUT=out/heist.wav [MAP=drums=ossuary,other=janiform] [DUR=12]
 #   make videotrack track -> matching visual clip:  make videotrack TRACK=out/heist.wav [OUT=out/heist.mp4] [FPS=30] [WIDTH=1080] [HEIGHT=1080] [SUBSTRATE=sound]
 #   make package   track -> social-ready bundle:     make package TRACK=out/heist.wav [TITLE="Heist"] [LINK=https://...] [SUBSTRATE=sound]
+#   make broadcast AETHER live radio (segmented-NRT -> live HLS):  make broadcast [SOURCE=out/tuned/x.wav] [SEGMENTS=0] [SECONDS=..] [SEED=1] [PERIOD=12]
 #   make demucs    install TRUE separation (htdemucs) for higher-quality rips
 #   make video     install headless video export (puppeteer) for videotrack
 
-.PHONY: help smoke dist serve validate clean stations tune rip forge render track stemtrack videotrack package demucs video
+.PHONY: help smoke dist serve validate clean stations tune rip forge render track stemtrack videotrack package broadcast demucs video
 
 help:
 	@grep -E '^#   make ' Makefile | sed 's/^#   /  /'
@@ -110,3 +111,14 @@ package:
 	bash tools/package.sh --track "$(TRACK)" \
 		$(if $(TITLE),--title "$(TITLE)",) $(if $(LINK),--link "$(LINK)",) \
 		$(if $(SUBSTRATE),--substrate $(SUBSTRATE),) $(if $(FPS),--fps $(FPS),)
+
+# broadcast: AETHER's living radio. The Cell-Cycle organism (tools/cellcycle.py)
+# conducts a continuous, evolving performance -> segmented render (SuperCollider
+# NRT when present; folded donor or a genome-reactive tone otherwise) -> a LIVE
+# rolling HLS stream in out/live (served at /live; watch it at /aether). Fold a
+# tune capture in with SOURCE=. SEGMENTS=0 (default) streams forever.
+broadcast:
+	bash tools/broadcast.sh \
+		$(if $(SOURCE),--source "$(SOURCE)",) $(if $(SEGMENTS),--segments $(SEGMENTS),) \
+		$(if $(SECONDS),--seconds $(SECONDS),) $(if $(SEED),--seed $(SEED),) \
+		$(if $(PERIOD),--period $(PERIOD),) $(if $(OUT),--out "$(OUT)",)

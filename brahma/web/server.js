@@ -24,6 +24,21 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/golem", express.static(path.join(__dirname, "public", "golem")));
 app.use("/cortex", express.static(path.join(__dirname, "public", "cortex")));
 
+// AETHER live broadcast: tools/broadcast.sh writes a rolling HLS stream +
+// telemetry.json into out/live (gitignored). Serve it at /live so the theatron
+// player (/aether) can attach. A live playlist/telemetry must NOT be cached, or
+// a player never sees new segments; .ts chunks are immutable and cacheable.
+const LIVE_DIR = process.env.BRAHMA_LIVE_DIR || path.join(__dirname, "..", "..", "out", "live");
+app.use("/live", express.static(LIVE_DIR, {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith(".m3u8") || filePath.endsWith(".json")) {
+            res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        } else if (filePath.endsWith(".ts")) {
+            res.setHeader("Content-Type", "video/mp2t");
+        }
+    },
+}));
+
 // REST API: module registry
 app.get("/api/modules", (req, res) => {
     res.json(Object.values(moduleCache));
@@ -148,6 +163,18 @@ udpPort.on("ready", () => {
 
 sendPort.on("ready", () => {
     console.log(`OSC Sender Ready -> port ${OSC_SEND_PORT}`);
+});
+
+// The OSC bridge to SuperCollider is OPTIONAL: the HTTP surface (dashboard,
+// /aether player, /live HLS stream) must survive when SC isn't running or the
+// OSC port is already taken. An unhandled 'error' on a dgram socket would
+// otherwise crash the whole process (EventEmitter semantics), taking the live
+// broadcast down with it. So we log and continue — degrade, don't die.
+udpPort.on("error", (err) => {
+    console.warn(`OSC listener unavailable on ${OSC_UDP_PORT} — serving HTTP without live SC telemetry (${err.code || err.message})`);
+});
+sendPort.on("error", (err) => {
+    console.warn(`OSC sender unavailable — serving HTTP without SC control (${err.code || err.message})`);
 });
 
 udpPort.open();

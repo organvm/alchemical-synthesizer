@@ -58,7 +58,8 @@ fi
 echo "=== [3/6] JS syntax (node --check) ==="
 if command -v node >/dev/null 2>&1; then
   for js in brahma/web/server.js brahma/web/public/sketch.js \
-            brahma/web/public/tree/video.js tools/render_video.mjs; do
+            brahma/web/public/tree/video.js brahma/web/public/aether/aether.js \
+            tools/render_video.mjs; do
     if node --check "$js" >/dev/null 2>&1; then ok "node --check $js"; else bad "node --check $js"; fi
   done
 else
@@ -113,10 +114,19 @@ fi
 
 echo "=== [6/6] Forge tools syntax (py_compile + bash -n) ==="
 if command -v python3 >/dev/null 2>&1; then
-  for py in tools/rip.py tools/stemforge.py tools/analyze_audio.py tools/validate_audio.py tools/gen_test_tone.py tools/tune.py; do
+  for py in tools/rip.py tools/stemforge.py tools/analyze_audio.py tools/validate_audio.py tools/gen_test_tone.py tools/tune.py tools/cellcycle.py tools/hls_append.py; do
     [ -f "$py" ] || continue
     if python3 -m py_compile "$py" >/tmp/brahma_pyc.log 2>&1; then ok "py_compile $py"; else bad "py_compile $py (see /tmp/brahma_pyc.log)"; tail -5 /tmp/brahma_pyc.log; fi
   done
+  # AETHER Broadcast: the generator organism and the transport plane each carry
+  # their own executable predicate (deterministic assertions). These prove the
+  # live-radio muscle, not just that the files parse.
+  if [ -f tools/cellcycle.py ]; then
+    if python3 tools/cellcycle.py --self-test >/tmp/brahma_cellcycle.log 2>&1; then ok "cellcycle.py --self-test"; else bad "cellcycle.py --self-test"; tail -8 /tmp/brahma_cellcycle.log; fi
+  fi
+  if [ -f tools/hls_append.py ]; then
+    if python3 tools/hls_append.py --self-test >/tmp/brahma_hls.log 2>&1; then ok "hls_append.py --self-test"; else bad "hls_append.py --self-test"; tail -8 /tmp/brahma_hls.log; fi
+  fi
   # AETHER source registry: must parse, and EVERY station must carry a license
   # (a source with no license tag could silently slip the publish-safety guard).
   if [ -f stations.json ]; then
@@ -132,7 +142,7 @@ else
   skip "python3 not installed — Forge py syntax"
 fi
 for sh in tools/forge.sh tools/bounce.sh tools/ingest.sh tools/setup-demucs.sh \
-          tools/videotrack.sh tools/setup-video.sh tools/package.sh tools/smoke.sh; do
+          tools/videotrack.sh tools/setup-video.sh tools/package.sh tools/broadcast.sh tools/smoke.sh; do
   [ -f "$sh" ] || continue
   if bash -n "$sh" >/dev/null 2>&1; then ok "bash -n $sh"; else bad "bash -n $sh"; fi
 done
@@ -140,6 +150,9 @@ for scd in brahma/sc/13_nrt_renderer.scd brahma/sc/14_stem_voices.scd; do
   [ -f "$scd" ] && ok "exists: $scd" || bad "missing: $scd"
 done
 [ -f brahma/web/public/tree/video.js ] && ok "exists: brahma/web/public/tree/video.js" || bad "missing: brahma/web/public/tree/video.js"
+# AETHER theatron player: the live-broadcast surface must ship with the runtime.
+[ -f brahma/web/public/aether/index.html ] && ok "exists: brahma/web/public/aether/index.html" || bad "missing: brahma/web/public/aether/index.html"
+[ -f brahma/web/public/aether/aether.js ] && ok "exists: brahma/web/public/aether/aether.js" || bad "missing: brahma/web/public/aether/aether.js"
 
 echo
 echo "=== Summary: ${PASS} passed, ${FAIL} failed, ${SKIP} skipped ==="
