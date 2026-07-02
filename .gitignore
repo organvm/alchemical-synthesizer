@@ -35,6 +35,10 @@ forge/
 out/
 .venv-demucs/
 
+# Ephemeral agent worktrees — never track their gitlinks (a git add sweep would
+# otherwise record .claude/worktrees/<name> as a broken 160000 gitlink).
+.claude/worktrees/
+
 # Python
 __pycache__/
 *.pyc
