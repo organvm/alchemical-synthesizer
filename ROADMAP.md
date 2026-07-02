@@ -34,9 +34,11 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
 - [ ] **Tier-1 separation live** — provision demucs (`tools/setup-demucs.sh`) so
       rips are true drum/melody theft, not band-splits. *(blocked: torch has no
       wheel for this box's Python 3.14 → install on 3.11 via uv/venv.)*
-- [ ] **Per-stem render** — feed each stem to a distinct creature (drums→Ossuary
-      Monk, melody→Mnemosyne, …) via a multi-buffer Score that reads `recipe.json`,
-      instead of a single premix. *This is the "supremely powerful modular" render.*
+- [x] **Per-stem render** — feed each stem to a distinct creature (drums→Ossuary,
+      bass→Mnemosyne, vocals→Chrysalid, melody→Prima) via a multi-buffer Score
+      that sums the voices under a master limiter, instead of a single premix
+      (`tools/stemforge.py` + `brahma/sc/14_stem_voices.scd`; `make stemtrack`,
+      per-stem `--map`). *The "supremely powerful modular" render. Verified on-machine.*
 - [ ] **Matching visual** — audio-reactive video export from the Etz Chaim Visual
       Cortex (`brahma/web`): MediaRecorder capture driven by the render's OSC trace,
       then ffmpeg-mux to the track. (`tools/package.sh`)
