@@ -42,12 +42,46 @@ from datetime import datetime, timezone
 
 SR = 44100
 CANONICAL = ["drums", "bass", "vocals", "other"]
-CANDIDATE_PYTHONS = [sys.executable, "python3.12", "python3.11", "python3.10", "python3"]
+
+# The isolated interpreter tools/setup-demucs.sh provisions (repo-local, since
+# the machine default Python may be too new for a torch wheel). Discovered
+# relative to this file so a `make rip` from anywhere finds it.
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_VENV_DEMUCS = os.path.join(_REPO_ROOT, ".venv-demucs", "bin", "python")
+
+
+def _candidate_pythons() -> list[str]:
+    """Interpreters to probe for demucs, best/most-specific first.
+
+    Order matters: an explicit override wins, then the repo-local venv that
+    setup-demucs.sh creates, then anything on PATH. Without the venv entry a
+    successful `setup-demucs.sh` would still leave rip.py on the ffmpeg tier.
+    """
+    cands = []
+    override = os.environ.get("BRAHMA_DEMUCS_PYTHON")
+    if override:
+        cands.append(override)
+    cands.append(_VENV_DEMUCS)
+    cands += [sys.executable, "python3.12", "python3.11", "python3.10", "python3"]
+    return cands
+
+
+CANDIDATE_PYTHONS = _candidate_pythons()
 
 
 def run(cmd, **kw):
-    """Run a command, raising with captured stderr on failure."""
-    return subprocess.run(cmd, check=True, capture_output=True, text=True, **kw)
+    """Run a command; on failure, surface the child's stderr before raising.
+
+    capture_output hides a subprocess's own error message inside the exception,
+    which turns a clear 'ModuleNotFoundError: torchcodec' into an opaque
+    'returned non-zero exit status 1'. Echo it so failures are diagnosable.
+    """
+    try:
+        return subprocess.run(cmd, check=True, capture_output=True, text=True, **kw)
+    except subprocess.CalledProcessError as e:
+        if e.stderr:
+            sys.stderr.write(e.stderr)
+        raise
 
 
 def have(tool: str) -> bool:
