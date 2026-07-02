@@ -60,19 +60,19 @@ rewired *and re-verified behind the paid `L-MEDIA-ARK-HOST` lever*.
 | Tool | Organ | Coupled? |
 |------|-------|----------|
 | `brahma/` (sc · pd · ableton · web) | Brahma | consumed by Aether container (`brahma/web`) |
-| `tools/ingest.sh` | Forge | — |
-| `tools/rip.py` | Forge | — |
-| `tools/forge.sh` | Forge | — |
-| `tools/stemforge.py` | Forge | — |
-| `tools/bounce.sh` | Forge | — |
-| `tools/tune.py` | Forge | — |
-| `tools/validate_audio.py` | Forge | — |
-| `tools/analyze_audio.py` | Forge | — |
-| `tools/render_video.mjs` | Forge | — |
-| `tools/videotrack.sh` | Forge | — |
-| `tools/package.sh` | Forge | — |
-| `tools/setup-demucs.sh` | Forge | — |
-| `tools/setup-video.sh` | Forge | — |
+| `forge/ingest.sh` | Forge | — |
+| `forge/rip.py` | Forge | — |
+| `forge/forge.sh` | Forge | — |
+| `forge/stemforge.py` | Forge | — |
+| `forge/bounce.sh` | Forge | reused by Aether (`broadcast.sh` NRT tier, SC-gated) — Dockerfile COPYs it |
+| `forge/tune.py` | Forge | reused by Aether (`broadcast.sh` submission capture) — Dockerfile COPYs it |
+| `forge/validate_audio.py` | Forge | — |
+| `forge/analyze_audio.py` | Forge | — |
+| `forge/render_video.mjs` | Forge | — |
+| `forge/videotrack.sh` | Forge | — |
+| `forge/package.sh` | Forge | — |
+| `forge/setup-demucs.sh` | Forge | — |
+| `forge/setup-video.sh` | Forge | — |
 | `tools/broadcast.sh` | Aether | **live container** |
 | `tools/cellcycle.py` | Aether | **live container** |
 | `tools/hls_append.py` | Aether | **live container** (called by `broadcast.sh`) |
@@ -92,17 +92,25 @@ strings (`smoke.sh` alone has 22 such references), and they are cited from the
 consolidation is a three-step untangle, not a `git mv`:
 
 1. **Make the boundaries authoritative** — this registry + the per-organ
-   manifests. **← done here.** No file moved; zero risk to the live radio, `make`,
+   manifests (landed in #34). No file moved; zero risk to the live radio, `make`,
    or CI.
-2. **Decouple references** — each script resolves siblings via a lane-relative
-   base instead of a hardcoded `tools/` path.
-3. **Move into lanes** — `git mv` per organ, references already lane-relative.
+2. **Decouple references** — update every `tools/X` reference to the moved
+   tool's new lane path in lockstep across callers and sibling scripts.
+3. **Move into lanes** — `git mv` per organ.
 
 Each organ owns steps 2–3 for its own tools in its manifest — nothing is parked
 here or in anyone's head:
 
-- **Forge** consolidation is deploy-safe (verifiable offline with `make -n`).
-  Owned in `forge/ORGAN.md`.
+- **Forge** consolidation is **done** — all 13 tools now live in `forge/`; the
+  `Makefile`, `ROADMAP.md`, `product/`, and the moved scripts' own sibling calls
+  were updated in lockstep and verified with `make -n` + `make smoke`. One
+  wrinkle surfaced and was handled: `broadcast.sh` (Aether) reuses two Forge
+  tools at runtime — `forge/tune.py` (submission capture) and `forge/bounce.sh`
+  (an SC-gated render tier) — and the container's `COPY tools/` was wholesale, so
+  the Dockerfile now also `COPY`s those two into `/app/forge/`. Both calls
+  degrade gracefully if absent, and the 24/7 container is not yet deployed
+  (gated behind `L-MEDIA-ARK-HOST`), so this carries no live-radio risk — only
+  keeps the eventual gated deploy consistent.
 - **Aether** consolidation is **gated**: the five container-coupled tools above
   stay in `tools/` by design until the container build is rewired *and* proven
   behind `L-MEDIA-ARK-HOST`. Owned in `deploy/aether/ORGAN.md`.

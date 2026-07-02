@@ -4,8 +4,8 @@
 # Drives brahma/sc/13_nrt_renderer.scd through sclang + scsynth -N with NO audio
 # device and NO GUI. This is the spine command behind `make render`.
 #
-#   Usage:  tools/bounce.sh <input.wav|mp3|...> <output.wav> [duration_seconds]
-#   e.g.    tools/bounce.sh forge/recipes/heist/premix.wav out/heist.wav 12
+#   Usage:  forge/bounce.sh <input.wav|mp3|...> <output.wav> [duration_seconds]
+#   e.g.    forge/bounce.sh forge/recipes/heist/premix.wav out/heist.wav 12
 #
 # Locates SuperCollider whether or not it is on PATH (macOS app bundle included).
 set -euo pipefail

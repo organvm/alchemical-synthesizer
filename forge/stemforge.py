@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """stemforge.py — Per-stem modular render: each stolen stem -> its own creature.
 
-Where tools/bounce.sh bounces ONE premix through a single voice, this renders
+Where forge/bounce.sh bounces ONE premix through a single voice, this renders
 EACH stem of a forge recipe through its OWN Brahma creature-voice and sums them
 under a master limiter. This is the "supremely powerful modular synth" made
 literal: steal the drums from song A and the melody from song B, and each part
@@ -13,13 +13,13 @@ gets re-expressed by a different organ of the machine.
     other  -> prima     (clean lead + octave shimmer)   [aka --melody]
     (opt)  -> janiform  (forward/reverse duality)
 
-It reads a recipe produced by tools/forge.sh (forge/recipes/<name>/recipe.json),
+It reads a recipe produced by forge/forge.sh (forge/recipes/<name>/recipe.json),
 normalizes each stem to stereo 44.1k WAV, and drives brahma/sc/14_stem_voices.scd
 headless (scsynth -N). Writes <out> and <out>.manifest.json (provenance: which
 song each stem came from, and which voice re-expressed it).
 
   Usage:
-    tools/stemforge.py <recipe.json | recipe-name> --out out/heist.wav [--dur N]
+    forge/stemforge.py <recipe.json | recipe-name> --out out/heist.wav [--dur N]
         [--map drums=ossuary,other=prima,bass=mnemosyne,vocals=chrysalid]
 
 Exit codes:  0 ok · 2 usage/input error · 3 SuperCollider or ffmpeg missing
@@ -56,7 +56,7 @@ VOICES = {"mnemosyne", "ossuary", "chrysalid", "prima", "janiform"}
 # stem name order = render/mix order (also the order forge.sh writes them).
 STEM_ORDER = ("drums", "bass", "vocals", "other")
 
-# macOS app-bundle + common PATHs, mirroring tools/bounce.sh.
+# macOS app-bundle + common PATHs, mirroring forge/bounce.sh.
 SCLANG_CANDIDATES = [
     "/Applications/SuperCollider/SuperCollider.app/Contents/MacOS/sclang",
     "/Applications/SuperCollider.app/Contents/MacOS/sclang",

@@ -31,7 +31,7 @@ let hovered = null;
 // --------------------------------------------------------------------- setup
 function setup() {
     // Headless video export: fixed canvas, frame clock, stepped on demand by
-    // tools/render_video.mjs. No OSC/WebSocket, no realtime loop.
+    // forge/render_video.mjs. No OSC/WebSocket, no realtime loop.
     if (Video.isActive()) {
         const d = Video.dims();
         createCanvas(d.w, d.h);

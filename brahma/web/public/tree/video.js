@@ -1,10 +1,10 @@
 // ============================================================================
 //  VIDEO MODE — the offline, frame-stepped cosmos.
 // ----------------------------------------------------------------------------
-//  For headless export (tools/render_video.mjs): when `window.__BRAHMA_VIDEO__`
+//  For headless export (forge/render_video.mjs): when `window.__BRAHMA_VIDEO__`
 //  is injected before the sketch boots, the Visual Cortex stops listening to
 //  OSC/DemoStream and instead is *driven by a rendered track's audio envelope*
-//  (from tools/analyze_audio.py), one deterministic frame at a time.
+//  (from forge/analyze_audio.py), one deterministic frame at a time.
 //
 //  The audio -> cosmos mapping:
 //    * spectral bands  -> vessels, low freq at the root (Malkuth) rising to the

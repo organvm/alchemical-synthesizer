@@ -10,7 +10,7 @@ something):
 
   Tier 1  demucs   — Meta's htdemucs model. TRUE separation into
                      drums / bass / vocals / other. Requires a torch-capable
-                     Python (see tools/setup-demucs.sh). This is the real thing.
+                     Python (see forge/setup-demucs.sh). This is the real thing.
   Tier 3  ffmpeg   — dependency-free fallback that runs TODAY. A karaoke
                      center-channel split (instrumental vs. lead) plus
                      frequency-band stems. Approximate, not true separation —
@@ -18,15 +18,15 @@ something):
                      prototype the pipeline and swap up to demucs with no rewrite.
 
   Usage:
-    tools/rip.py <song> [--out DIR] [--name NAME] [--engine auto|demucs|ffmpeg]
-    tools/rip.py songA.mp3 --name songA
-    tools/rip.py songB.wav --engine ffmpeg
+    forge/rip.py <song> [--out DIR] [--name NAME] [--engine auto|demucs|ffmpeg]
+    forge/rip.py songA.mp3 --name songA
+    forge/rip.py songB.wav --engine ffmpeg
 
   Output:
     <out>/<name>/drums.wav bass.wav vocals.wav other.wav  (+ instrumental.wav on ffmpeg tier)
     <out>/<name>/manifest.json   — source, engine, tier, quality, per-stem sha256
 
-The manifest is the contract the forge (tools/forge.sh) and the SC renderer read.
+The manifest is the contract the forge (forge/forge.sh) and the SC renderer read.
 """
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ from datetime import datetime, timezone
 SR = 44100
 CANONICAL = ["drums", "bass", "vocals", "other"]
 
-# The isolated interpreter tools/setup-demucs.sh provisions (repo-local, since
+# The isolated interpreter forge/setup-demucs.sh provisions (repo-local, since
 # the machine default Python may be too new for a torch wheel). Discovered
 # relative to this file so a `make rip` from anywhere finds it.
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -200,7 +200,7 @@ def main() -> int:
         demucs_py = find_demucs_python()
         if args.engine == "demucs" and not demucs_py:
             print("rip: --engine demucs requested but demucs is not importable in any "
-                  "candidate Python. Run tools/setup-demucs.sh, or use --engine ffmpeg.",
+                  "candidate Python. Run forge/setup-demucs.sh, or use --engine ffmpeg.",
                   file=sys.stderr)
             return 3
 
@@ -210,7 +210,7 @@ def main() -> int:
             result = rip_demucs(demucs_py, args.song, dest, args.model)
         else:
             print("rip: engine=ffmpeg fallback — APPROXIMATE stems (install demucs for true "
-                  "drum/melody theft: tools/setup-demucs.sh)", file=sys.stderr)
+                  "drum/melody theft: forge/setup-demucs.sh)", file=sys.stderr)
             wav = normalize(args.song, tmp)
             result = rip_ffmpeg(wav, dest)
 

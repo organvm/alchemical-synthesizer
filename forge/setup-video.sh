@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # setup-video.sh — Provision headless video export for the Visual Cortex.
 #
-# tools/videotrack.sh renders the Etz Chaim cosmos to a matching audio-reactive
+# forge/videotrack.sh renders the Etz Chaim cosmos to a matching audio-reactive
 # clip. That render runs the real p5 sketch in headless Chrome via Puppeteer.
 #
 # Puppeteer (and the Chromium it downloads) is a heavy, optional tool, so — like
 # demucs's .venv-demucs — it is NOT in brahma/web/package.json. Installing it
 # with --no-save keeps it out of the committed manifest (so CI's `npm ci` never
 # pulls Chromium) while landing it in brahma/web/node_modules (gitignored), where
-# tools/render_video.mjs auto-discovers it.
+# forge/render_video.mjs auto-discovers it.
 #
 # Also checks for ffmpeg (used to decode audio for analysis and to mux the clip).
 set -euo pipefail

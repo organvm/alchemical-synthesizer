@@ -59,7 +59,7 @@ try_venv() {
 }
 
 if try_uv || try_pipx || try_venv; then
-  echo "setup-demucs: DONE. Verify:  tools/rip.py <song> --engine demucs"
+  echo "setup-demucs: DONE. Verify:  forge/rip.py <song> --engine demucs"
 else
   cat >&2 <<'EOF'
 setup-demucs: no compatible installer found.

@@ -7,7 +7,7 @@
 #   <base>.cover.png    a cover still (the track's most energetic frame)
 #   <base>.caption.txt  a paste-ready caption (title + attribution + link + tags)
 #
-#   Usage:  tools/package.sh --track out/heist.wav
+#   Usage:  forge/package.sh --track out/heist.wav
 #              [--title "Heist"] [--link https://...] [--out-dir out/pkg/heist]
 #              [--fps 30] [--substrate sound|idea|product|cosmos] [--width N] [--height N]
 #
@@ -51,7 +51,7 @@ COVER="$OUTDIR/$base.cover.png"
 CAPTION="$OUTDIR/$base.caption.txt"
 
 echo "package: building social bundle for '$TITLE' -> $OUTDIR" >&2
-bash tools/videotrack.sh --track "$TRACK" --out "$MP4" --cover "$COVER" \
+bash forge/videotrack.sh --track "$TRACK" --out "$MP4" --cover "$COVER" \
   --attribution --title "$TITLE" \
   ${FPS:+--fps "$FPS"} ${SUBSTRATE:+--substrate "$SUBSTRATE"} \
   ${WIDTH:+--width "$WIDTH"} ${HEIGHT:+--height "$HEIGHT"}

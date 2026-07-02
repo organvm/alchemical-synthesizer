@@ -21,18 +21,18 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
 > The repeatable spine so a track ships a couple times a week and each one pushes
 > the sampler. Stage the joints; ship the smallest reversible piece first.
 
-- [x] **Ingest** — any song → scsynth-ready WAV (`tools/ingest.sh`, ffmpeg). *Verified.*
+- [x] **Ingest** — any song → scsynth-ready WAV (`forge/ingest.sh`, ffmpeg). *Verified.*
 - [x] **Rip apart** — song → stems (drums/bass/vocals/other) via a tiered cascade
-      (`tools/rip.py`): Tier-1 **demucs** (true separation) → Tier-3 **ffmpeg**
+      (`forge/rip.py`): Tier-1 **demucs** (true separation) → Tier-3 **ffmpeg**
       fallback (approximate, dependency-free, runs today). *Verified (ffmpeg tier).*
 - [x] **Forge** — recombine stolen stems ("drums from A, melody from B") into a
-      recipe + provenance (`tools/forge.sh`), with `--mix` premix. *Verified.*
+      recipe + provenance (`forge/forge.sh`), with `--mix` premix. *Verified.*
 - [x] **Render** — headless NRT bounce, a WAV → Brahma-re-expressed WAV, no GUI /
-      no audio device (`brahma/sc/13_nrt_renderer.scd` + `tools/bounce.sh`).
+      no audio device (`brahma/sc/13_nrt_renderer.scd` + `forge/bounce.sh`).
       *Verified on SuperCollider 3.14.1.*
 - [x] **Cadence** — one command from two stems to a track: `make track`. *Verified.*
 - [x] **Tier-1 separation live** — demucs (htdemucs) provisioned on Python 3.11
-      via `tools/setup-demucs.sh` (uv → `.venv-demucs`, incl. `torchcodec` for the
+      via `forge/setup-demucs.sh` (uv → `.venv-demucs`, incl. `torchcodec` for the
       torchaudio ≥2.9 I/O backend); `rip.py` auto-discovers the venv (repo-local
       or `$BRAHMA_DEMUCS_PYTHON`) and switches to true drum/melody theft with no
       flags. *Verified on-machine: a tonal input routed to `other` @ −13.5 dB,
@@ -40,13 +40,13 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
 - [x] **Per-stem render** — feed each stem to a distinct creature (drums→Ossuary,
       bass→Mnemosyne, vocals→Chrysalid, melody→Prima) via a multi-buffer Score
       that sums the voices under a master limiter, instead of a single premix
-      (`tools/stemforge.py` + `brahma/sc/14_stem_voices.scd`; `make stemtrack`,
+      (`forge/stemforge.py` + `brahma/sc/14_stem_voices.scd`; `make stemtrack`,
       per-stem `--map`). *The "supremely powerful modular" render. Verified on-machine.*
 - [x] **Matching visual** — audio-reactive video export from the Etz Chaim Visual
       Cortex (`brahma/web`). A track's audio is analyzed into a per-frame envelope
-      (`tools/analyze_audio.py`: RMS + log-spaced spectral bands + flatness + onsets,
+      (`forge/analyze_audio.py`: RMS + log-spaced spectral bands + flatness + onsets,
       stdlib + ffmpeg), which drives the real p5 sketch headlessly frame-by-frame
-      (`tools/render_video.mjs` via puppeteer; `tree/video.js` maps bands→vessels
+      (`forge/render_video.mjs` via puppeteer; `tree/video.js` maps bands→vessels
       bass-to-crown, loudness→gain, flatness→entropy, onsets→Lightning Flash, with a
       deterministic frame-clock override of `millis()`), then ffmpeg muxes frames +
       audio into a post-ready mp4. `make videotrack TRACK=out/x.wav` (setup once via
@@ -57,7 +57,7 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
       a `.cover.png` (the track's peak-energy frame, so the still can't drift from
       the clip), and a paste-ready `.caption.txt` (title + attribution + link +
       tags; set `$BRAHMA_LINK` to bake in the funnel URL). `make package
-      TRACK=out/x.wav [TITLE="…"] [LINK=…]` (`tools/package.sh` →
+      TRACK=out/x.wav [TITLE="…"] [LINK=…]` (`forge/package.sh` →
       `videotrack.sh --attribution --title --cover`). *Composes with `make
       track`/`make stemtrack`; verified on-machine.*
 ### AETHER — a living radio: Brahma listens, transmutes, broadcasts
@@ -71,7 +71,7 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
 > deployed streaming machinery across the ecosystem (converge, don't rebuild).
 
 - [x] **Listen** — sample live/free web audio (internet-radio streams +
-      public-domain / CC0 archives) into a Forge-ready WAV. `tools/tune.py` +
+      public-domain / CC0 archives) into a Forge-ready WAV. `forge/tune.py` +
       `stations.json` (a license-tagged source registry) + `make tune`/`make
       stations`. Every capture writes a provenance sidecar (`<out>.source.json`)
       and is license-gated: `--publish-safe-only` refuses anything not

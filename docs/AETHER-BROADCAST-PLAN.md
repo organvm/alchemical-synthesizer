@@ -26,7 +26,7 @@ Four facts from the design corpus are load-bearing for every path below:
   every performance is defined by what the system is allowed to consume."* "Eating radio" =
   **Mnemosyne / Protean Hound / Chrysalid Siren / Ossuary Monk / Janiform Child** absorbing a
   live feed at operator-controlled **Fidelity N (0–100%)**, tagged with lineage — exactly what
-  `tools/tune.py`'s provenance sidecar (`<out>.source.json`) already records.
+  `forge/tune.py`'s provenance sidecar (`<out>.source.json`) already records.
 - **It already plays itself.** `docs/logos/pragma.md`: an **auto-demo at boot** (Prima Materia +
   MOIRAI + Euclidean + Lorenz), **generative drivers are first-class inputs** (Lorenz / Markov /
   cellular automata / CHRONOS), and organism state is **already broadcast at 10 Hz** to the Web
@@ -76,7 +76,7 @@ generative organism:
 - **10 Hz telemetry** already streams organism state to the Web Cortex.
 
 First realization: **segmented-NRT** — render evolving consecutive A/V segments, carrying organism
-state forward, reusing `tools/bounce.sh` / `tools/stemforge.py` / `tools/render_video.mjs`
+state forward, reusing `forge/bounce.sh` / `forge/stemforge.py` / `forge/render_video.mjs`
 verbatim. No realtime-audio device required.
 
 ### Distribution plane (converged from the deployed estate — nothing new to invent)
@@ -197,4 +197,4 @@ defines how "a sampler" becomes a real instrument and how the stream *evolves st
   `…-Modular-Synthesizer-Design.md`, `…-Ditto-Design.md`, `…-Agent-Smith-Synth-Design.md`,
   `…-Digital-Clones-Design-Guide.md`
 - Surfaces / market: `docs/surfaces/market.md`, `docs/surfaces/academic.md`
-- Shipped Listen increment: `tools/tune.py`, `stations.json`, `make tune` / `make stations`
+- Shipped Listen increment: `forge/tune.py`, `stations.json`, `make tune` / `make stations`

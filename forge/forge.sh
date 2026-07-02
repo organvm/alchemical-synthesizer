@@ -2,13 +2,13 @@
 # forge.sh — Recombine stolen stems into a new recipe ("drums from A, melody from B").
 #
 # This is the modular composer at the file level: point each part at a stem from
-# ANY rip (see tools/rip.py). The forge assembles them into a recipe directory,
+# ANY rip (see forge/rip.py). The forge assembles them into a recipe directory,
 # records provenance in recipe.json, and (with --mix) bounces a rough premix WAV
-# you can immediately feed to the Brahma NRT renderer (tools/bounce.sh) for
+# you can immediately feed to the Brahma NRT renderer (forge/bounce.sh) for
 # re-expression.
 #
 #   Usage:
-#     tools/forge.sh --name NAME [--out DIR] \
+#     forge/forge.sh --name NAME [--out DIR] \
 #         --drums  forge/stems/songA/drums.wav \
 #         --melody forge/stems/songB/other.wav \
 #         [--bass path] [--vocals path] [--other path] [--mix]
@@ -89,5 +89,5 @@ JSON
 
 echo "forge: recipe '$NAME' -> $dest"
 echo "  parts: ${!PART[*]}"
-[ "$MIX" -eq 1 ] && echo "  premix: $dest/premix.wav (feed to tools/bounce.sh)"
+[ "$MIX" -eq 1 ] && echo "  premix: $dest/premix.wav (feed to forge/bounce.sh)"
 echo "  recipe: $dest/recipe.json"

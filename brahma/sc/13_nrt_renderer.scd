@@ -4,7 +4,7 @@
   The headless spine: fed a WAV ("the food"), Brahma re-expresses it and writes
   a new WAV ("the result") with NO audio device and NO GUI — via scsynth -N
   (Score.recordNRT). This is what turns "make a track" into one command
-  (tools/bounce.sh -> `make render`).
+  (forge/bounce.sh -> `make render`).
 
   Self-contained by design: it defines its OWN forge voice (Mnemosyne tape aging
   + light transmutation) and ships it into the NRT server as a \d_recv bundle, so
@@ -12,7 +12,7 @@
   chains (Relinquished, Proteus) can be swapped into `forgeDef` as they are made
   NRT-safe.
 
-  Driven from sclang (see tools/bounce.sh):
+  Driven from sclang (see forge/bounce.sh):
     Server.program = "/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth";
     "brahma/sc/13_nrt_renderer.scd".load;
     ~nrt_renderer.renderSpecimen("/path/in.wav", "/path/out.wav", 12.0, true);

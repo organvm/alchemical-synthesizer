@@ -22,7 +22,7 @@ consumes.
 - `tools/hls_append.py` — HLS playlist/segment append
 - `tools/ingest_queue.py` — external-source submit queue (`make submit`)
 - `tools/r2_sync.sh` — push segments to R2
-- `tools/tune.py` — station tuning + capture (`make tune`, `make stations`)
+- `forge/tune.py` — station tuning + capture (`make tune`, `make stations`)
 - `tools/cellcycle.py`, `tools/lineage.py` — generative cycle + lineage
 - `tools/smoke.sh` — shared smoke harness (verify AETHER-only usage before moving)
 
