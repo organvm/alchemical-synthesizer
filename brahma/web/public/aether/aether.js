@@ -142,7 +142,56 @@
             });
     }
 
+    // ---- 4. Ω · Ouroboros: feed the organism + render the lineage ------
+    var LINEAGE = STREAM_BASE + "/lineage.json";
+
+    function initOuroboros() {
+        var form = document.getElementById("ob-form");
+        if (!form) return;
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            var url = document.getElementById("ob-url").value.trim();
+            var lic = document.getElementById("ob-license").value;
+            var msg = document.getElementById("ob-msg");
+            if (!/^https?:\/\//i.test(url)) { msg.textContent = "Enter a http(s) stream URL."; return; }
+            msg.textContent = "feeding…";
+            fetch("/submit", {
+                method: "POST", headers: { "content-type": "application/json" },
+                body: JSON.stringify({ url: url, license: lic }),
+            })
+                .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+                .then(function (res) {
+                    msg.textContent = res.ok
+                        ? "queued — a creature will eat it live. (" + (res.j.id || "queued") + ")"
+                        : "couldn't queue: " + (res.j.error || "unavailable");
+                    if (res.ok) form.reset();
+                })
+                .catch(function () { msg.textContent = "submission endpoint unreachable (needs the live host)."; });
+        });
+    }
+
+    function pollLineage() {
+        var box = document.getElementById("chain");
+        if (!box) return;
+        fetch(LINEAGE, { cache: "no-store" })
+            .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+            .then(function (d) {
+                var es = (d && d.entries) || [];
+                if (!es.length) { box.innerHTML = ""; return; }
+                var chain = es.slice(-10).map(function (e) {
+                    var self = e.source === "ouroboros:self";
+                    var src = self ? "∞ self" : (e.source || "").replace(/^https?:\/\//, "").slice(0, 28);
+                    return '<span class="' + (self ? "self" : "lk") + '">' + e.creature.split("-")[0] + " ⟵ " + src + "</span>";
+                });
+                box.innerHTML = "<b>lineage</b> (" + es.length + " absorbed) — " + chain.join(" · ");
+            })
+            .catch(function () { /* no lineage yet */ });
+    }
+
     attach();
+    initOuroboros();
     poll();
+    pollLineage();
     setInterval(poll, POLL_MS);
+    setInterval(pollLineage, POLL_MS * 2);
 })();

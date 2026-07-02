@@ -154,9 +154,24 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
       showwaves), no-key refusal, `bash -n` + contract-valid + dry-run encode all
       in smoke.* The sovereign HLS stream stays the home; the RTMP push is the
       lure. First live push needs the platform stream key (the one gated atom).
-- [ ] **Ω — Ouroboros** — *[increment 6]* viewers submit a stream URL → a creature
-      eats it live; a lineage browser; the "consume you back" loop; then
-      substrate-agnostic (absorb non-audio). *"Output re-enters as input."*
+- [x] **Ω — Ouroboros** — *[increment 6]* the omega, and it reuses everything:
+      viewers submit a stream URL (`POST /submit` on the live host, or `make
+      submit`) → it lands in the queue authority (`tools/ingest_queue.py`) →
+      `broadcast.sh` pops it → `tune.py` captures it → **a creature eats it
+      live**. The `--ouroboros` flag re-feeds Brahma's *own* prior output as a
+      donor ("output re-enters as input"). Every absorption is chained in the
+      **lineage** ledger (`tools/lineage.py` → `lineage.json`: id/epoch/fidelity/
+      source/license/creature/**parent**), browsable in the theatron player's
+      Ω panel. Also fixed `tune.py` to accept non-network inputs (its HTTP
+      `-reconnect` flags rejected local/file donors). *Verified end-to-end: a
+      seeded submission absorbed (parent=genesis), self-consumption chained
+      seg0→seg2→seg5, `POST /submit` enqueues (bad URL → 400), and
+      ingest_queue/lineage self-tests + an Ouroboros integration test all pass in
+      smoke. On this machine the absorbed segments render via **real
+      SuperCollider NRT** (bounce.sh discovers SC via app-bundle paths that
+      `command -v` misses — the earlier "SC-gated" note was conservative).*
+      Substrate-agnostic (non-audio) absorption is the far seam (the queue carries
+      a `kind` field for it).
 
 **Human-gated decision atoms** (do not silently decide):
 - **Rights posture** — commercially sampling copyrighted songs *or radio/stream

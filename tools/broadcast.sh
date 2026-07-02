@@ -50,6 +50,8 @@ LIST_SIZE=6
 ABR="160k"
 NO_NRT=0
 FINALIZE=0
+OUROBOROS=0           # --ouroboros: re-feed own output as input ("consume you back")
+SUBMIT_DIR=""         # Ω queue: viewer submissions a creature eats live
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -62,6 +64,8 @@ while [ $# -gt 0 ]; do
     --list-size)  LIST_SIZE="$2"; shift 2;;
     --abr)        ABR="$2"; shift 2;;
     --no-nrt)     NO_NRT=1; shift;;
+    --ouroboros)  OUROBOROS=1; shift;;
+    --submit-dir) SUBMIT_DIR="$2"; shift 2;;
     --finalize)   FINALIZE=1; shift;;
     -h|--help)    grep -E '^#( |$)' "$0" | sed 's/^# \{0,1\}//'; exit 0;;
     *) echo "broadcast: unknown arg $1" >&2; exit 2;;
@@ -74,6 +78,9 @@ command -v python3 >/dev/null 2>&1 || { echo "broadcast: python3 required" >&2; 
 PLAYLIST="$OUT/stream.m3u8"
 STATE="$OUT/organism.json"
 TELEMETRY="$OUT/telemetry.json"
+LINEAGE="$OUT/lineage.json"                       # Ω: the stream is a lineage, not a loop
+[ -z "$SUBMIT_DIR" ] && SUBMIT_DIR="$OUT/queue"   # Ω: viewer submissions land here
+PREV_WAV=""                                        # last output, for the Ouroboros self-feed
 WORK="$(mktemp -d)"; trap 'rm -rf "$WORK"' EXIT
 mkdir -p "$OUT"
 
@@ -147,22 +154,55 @@ print(f"G_SECS={g['seconds']}")
 print(f"G_CREATURE={g['creature']}")
 print(f"G_PHASE={g['phase']}")
 print(f"G_ENT={g['entropy']}")
+print(f"G_FID={g['fidelity']}")
+print(f"G_EPOCH={g['epoch']}")
 PY
 )"
 
   SECS="${SECONDS_OVERRIDE:-$G_SECS}"
   SEG_WAV="$WORK/seg_$G_SEG.wav"
 
-  # 2. RENDER: produce this segment (graceful tiers).
+  # 1.5 ABSORB (Ω): decide this segment's donor. A viewer submission (a creature
+  # eats it live) takes priority; else the Ouroboros self-feed re-eats our own
+  # last output; else the default --source (may be empty -> self-generated tone).
+  SEG_SOURCE="$SOURCE"
+  ABSORB_SOURCE=""            # non-empty -> record a lineage entry for this segment
+  ABSORB_LICENSE="unknown"
+  SUB="$(python3 "$HERE/tools/ingest_queue.py" pop --dir "$SUBMIT_DIR" 2>/dev/null || true)"
+  if [ -n "$SUB" ]; then
+    eval "$(SUB_JSON="$SUB" python3 - <<'PY'
+import os, json
+s = json.loads(os.environ["SUB_JSON"])
+print(f"SUB_URL={json.dumps(s.get('url',''))}")
+print(f"SUB_LIC={s.get('license','unknown')}")
+PY
+)"
+    TUNED="$WORK/sub_$G_SEG.wav"
+    if python3 "$HERE/tools/tune.py" --url "$SUB_URL" --license "$SUB_LIC" \
+         --secs "$SECS" --out "$TUNED" >/dev/null 2>&1 && [ -s "$TUNED" ]; then
+      SEG_SOURCE="$TUNED"; ABSORB_SOURCE="$SUB_URL"; ABSORB_LICENSE="$SUB_LIC"
+      echo "  ⟳ absorbing submission: $SUB_URL [$SUB_LIC]" >&2
+    else
+      echo "  ⚠ submission unreachable, skipping: $SUB_URL" >&2
+    fi
+  fi
+  if [ -z "$ABSORB_SOURCE" ] && [ "$OUROBOROS" = 1 ] && [ -n "$PREV_WAV" ] && [ -s "$PREV_WAV" ] \
+     && [ $(( G_SEG % 3 )) -eq 2 ]; then
+    # "output re-enters as input" — the organism eats its own prior expression.
+    SEG_SOURCE="$PREV_WAV"; ABSORB_SOURCE="ouroboros:self"; ABSORB_LICENSE="own"
+    echo "  ∞ ouroboros: re-eating own output" >&2
+  fi
+
+  # 2. RENDER: produce this segment (graceful tiers) from SEG_SOURCE.
   RENDER_TIER="tone"
-  if [ -n "$SOURCE" ] && [ "$HAVE_SC" = 1 ] && [ "$NO_NRT" = 0 ]; then
-    if bash "$HERE/tools/bounce.sh" "$SOURCE" "$SEG_WAV" "$SECS" >/dev/null 2>&1; then
+  if [ -n "$SEG_SOURCE" ] && [ "$HAVE_SC" = 1 ] && [ "$NO_NRT" = 0 ]; then
+    if bash "$HERE/tools/bounce.sh" "$SEG_SOURCE" "$SEG_WAV" "$SECS" >/dev/null 2>&1; then
       RENDER_TIER="nrt"
     fi
   fi
-  if [ ! -s "$SEG_WAV" ] && [ -n "$SOURCE" ]; then
+  if [ ! -s "$SEG_WAV" ] && [ -n "$SEG_SOURCE" ]; then
     # donor passthrough: take SECS from the source (loop if shorter).
-    if ffmpeg -hide_banner -loglevel error -y -stream_loop -1 -i "$SOURCE" \
+    if ffmpeg -hide_banner -loglevel error -y -stream_loop -1 -i "$SEG_SOURCE" \
          -t "$SECS" -ac 2 -ar 44100 -c:a pcm_s16le "$SEG_WAV" >/dev/null 2>&1; then
       RENDER_TIER="donor"
     fi
@@ -191,6 +231,19 @@ PY
       echo "broadcast: hls append failed for segment $G_SEG" >&2; }
 
   update_telemetry "$GENOME" "$RENDER_TIER"
+
+  # Ω LINEAGE: record what this segment absorbed (a lineage, not a loop).
+  if [ -n "$ABSORB_SOURCE" ]; then
+    python3 "$HERE/tools/lineage.py" append --file "$LINEAGE" \
+      --id "seg_$G_SEG" --epoch "$G_EPOCH" --fidelity "$G_FID" \
+      --source "$ABSORB_SOURCE" --license "$ABSORB_LICENSE" --creature "$G_CREATURE" \
+      >/dev/null 2>&1 || true
+  fi
+
+  # Keep this output as the Ouroboros seed for a later segment, then release.
+  if [ "$OUROBOROS" = 1 ]; then
+    cp -f "$SEG_WAV" "$WORK/prev.wav" 2>/dev/null && PREV_WAV="$WORK/prev.wav"
+  fi
   rm -f "$SEG_WAV"
 
   echo "  seg $G_SEG  $G_PHASE/$G_CREATURE  ${SECS}s  tier=$RENDER_TIER" >&2

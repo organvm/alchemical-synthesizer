@@ -23,10 +23,18 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const { execFile } = require("child_process");
 
 const PORT = Number(process.env.PORT || 8080);
 const LIVE_DIR = process.env.AETHER_LIVE_DIR || "/live";
 const STATIC_DIR = process.env.AETHER_STATIC_DIR || path.join(__dirname, "player");
+// Ω submission intake: POST /submit enqueues a viewer's stream URL through the
+// single queue authority (tools/ingest_queue.py), which tools/broadcast.sh pops
+// so a creature eats it live. Tools dir defaults to the container layout (/app),
+// overridable for local dev.
+const QUEUE_DIR = path.join(LIVE_DIR, "queue");
+const TOOLS_DIR = process.env.AETHER_TOOLS_DIR ||
+  (fs.existsSync("/app/tools/ingest_queue.py") ? "/app/tools" : path.join(__dirname, "..", "..", "tools"));
 
 const MIME = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
@@ -65,6 +73,37 @@ const server = http.createServer((req, res) => {
   if (urlPath === "/healthz") {
     res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(JSON.stringify({ ok: true, uptime: process.uptime() }));
+  }
+
+  // Ω: a viewer feeds the organism. POST /submit { url, license?, attribution? }
+  // -> enqueue via the single queue authority; broadcast.sh pops it, a creature
+  // eats it live. Rights posture stays human-gated (license recorded, not cleared).
+  if (urlPath === "/submit" && req.method === "POST") {
+    let body = "";
+    req.on("data", (c) => { body += c; if (body.length > 4096) req.destroy(); });
+    req.on("end", () => {
+      let payload;
+      try { payload = JSON.parse(body || "{}"); } catch { payload = {}; }
+      const url = String(payload.url || "").trim();
+      if (!/^https?:\/\//i.test(url)) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ ok: false, error: "a http(s) stream URL is required" }));
+      }
+      const args = [path.join(TOOLS_DIR, "ingest_queue.py"), "add", "--url", url,
+        "--license", String(payload.license || "unknown"), "--dir", QUEUE_DIR];
+      if (payload.attribution) args.push("--attribution", String(payload.attribution));
+      execFile("python3", args, { timeout: 5000 }, (err, stdout) => {
+        if (err) {
+          res.writeHead(503, { "Content-Type": "application/json" });
+          return res.end(JSON.stringify({ ok: false, error: "queue unavailable" }));
+        }
+        let rec = {};
+        try { rec = JSON.parse(stdout); } catch { /* ignore */ }
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: true, id: rec.id || null, note: "queued — a creature will eat it live." }));
+      });
+    });
+    return;
   }
 
   // Live stream: served from LIVE_DIR. Playlists/telemetry must not be cached.
