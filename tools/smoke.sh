@@ -35,7 +35,7 @@ req_files=(
   "brahma/sc/loader.scd"
   "brahma/web/server.js"
   "brahma/ableton/src/index.js"
-  "tools/validate_audio.py"
+  "forge/validate_audio.py"
   "README.md"
 )
 for f in "${req_files[@]}"; do
@@ -60,7 +60,7 @@ if command -v node >/dev/null 2>&1; then
   for js in brahma/web/server.js brahma/web/public/sketch.js \
             brahma/web/public/tree/video.js brahma/web/public/aether/aether.js \
             brahma/web/public/instrument/pattern.js brahma/web/public/instrument/instrument.js \
-            deploy/aether/serve.js deploy/aether/worker.mjs tools/render_video.mjs; do
+            deploy/aether/serve.js deploy/aether/worker.mjs forge/render_video.mjs; do
     [ -f "$js" ] || continue
     if node --check "$js" >/dev/null 2>&1; then ok "node --check $js"; else bad "node --check $js"; fi
   done
@@ -76,7 +76,7 @@ echo "=== [4/6] Python audio validator ==="
 if command -v python3 >/dev/null 2>&1; then
   TONE="$(mktemp -d)/test_tone.wav"
   if python3 tools/gen_test_tone.py "$TONE" >/dev/null 2>&1 \
-     && python3 tools/validate_audio.py "$TONE" >/tmp/brahma_validator.log 2>&1; then
+     && python3 forge/validate_audio.py "$TONE" >/tmp/brahma_validator.log 2>&1; then
     ok "validate_audio.py accepts generated tone"
   else
     bad "validate_audio.py (see /tmp/brahma_validator.log)"; tail -8 /tmp/brahma_validator.log
@@ -120,7 +120,7 @@ fi
 
 echo "=== [6/6] Forge tools syntax (py_compile + bash -n) ==="
 if command -v python3 >/dev/null 2>&1; then
-  for py in tools/rip.py tools/stemforge.py tools/analyze_audio.py tools/validate_audio.py tools/gen_test_tone.py tools/tune.py tools/cellcycle.py tools/hls_append.py; do
+  for py in forge/rip.py forge/stemforge.py forge/analyze_audio.py forge/validate_audio.py tools/gen_test_tone.py forge/tune.py tools/cellcycle.py tools/hls_append.py; do
     [ -f "$py" ] || continue
     if python3 -m py_compile "$py" >/tmp/brahma_pyc.log 2>&1; then ok "py_compile $py"; else bad "py_compile $py (see /tmp/brahma_pyc.log)"; tail -5 /tmp/brahma_pyc.log; fi
   done
@@ -149,13 +149,13 @@ if command -v python3 >/dev/null 2>&1; then
       bad "stations.json: malformed or a source is missing name/url/license"
     fi
     # tune.py --list must run against the registry without error.
-    if python3 tools/tune.py --list >/dev/null 2>&1; then ok "tune.py --list"; else bad "tune.py --list"; fi
+    if python3 forge/tune.py --list >/dev/null 2>&1; then ok "tune.py --list"; else bad "tune.py --list"; fi
   fi
 else
   skip "python3 not installed — Forge py syntax"
 fi
-for sh in tools/forge.sh tools/bounce.sh tools/ingest.sh tools/setup-demucs.sh \
-          tools/videotrack.sh tools/setup-video.sh tools/package.sh tools/broadcast.sh \
+for sh in forge/forge.sh forge/bounce.sh forge/ingest.sh forge/setup-demucs.sh \
+          forge/videotrack.sh forge/setup-video.sh forge/package.sh tools/broadcast.sh \
           tools/r2_sync.sh tools/rebroadcast.sh deploy/aether/entrypoint.sh tools/smoke.sh; do
   [ -f "$sh" ] || continue
   if bash -n "$sh" >/dev/null 2>&1; then ok "bash -n $sh"; else bad "bash -n $sh"; fi

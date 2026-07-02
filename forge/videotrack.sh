@@ -5,14 +5,14 @@
 # envelope, drive the Visual Cortex (Etz Chaim Tree of Life) headlessly frame by
 # frame, then mux the frames with the original audio into a post-ready clip.
 #
-#   Usage:  tools/videotrack.sh --track out/heist.wav [--out out/heist.mp4]
+#   Usage:  forge/videotrack.sh --track out/heist.wav [--out out/heist.mp4]
 #                [--fps 30] [--width 1080] [--height 1080]
 #                [--substrate sound|idea|product|cosmos] [--bands 12]
 #                [--hud] [--keep-frames]
 #                [--attribution] [--title "Heist"] [--cover out/heist.cover.png]
 #
 # --attribution/--title burn a "made with Brahma" mark (+ title) into the clip;
-# --cover writes the track's most energetic frame out as a still. (tools/package.sh
+# --cover writes the track's most energetic frame out as a still. (forge/package.sh
 # wires these into a post-ready bundle.)
 #
 # Pipeline:  analyze_audio.py  ->  render_video.mjs (puppeteer)  ->  ffmpeg mux
@@ -65,7 +65,7 @@ PYTHON="$(find_bin python3 /opt/homebrew/bin/python3 /usr/local/bin/python3 || t
 
 # puppeteer is provisioned on demand (make video); resolve it from brahma/web
 if ! ( cd "$HERE/brahma/web" && "$NODE" -e "require.resolve('puppeteer')" ) >/dev/null 2>&1; then
-  echo "videotrack: puppeteer not installed — run 'make video' (tools/setup-video.sh)" >&2
+  echo "videotrack: puppeteer not installed — run 'make video' (forge/setup-video.sh)" >&2
   exit 3
 fi
 
@@ -77,7 +77,7 @@ work="$(mktemp -d)"; [ "$KEEP" = "1" ] || trap 'rm -rf "$work"' EXIT
 frames="$work/frames"; env="$work/env.json"
 
 echo "videotrack: analyzing $TRACK (${FPS}fps, ${BANDS} bands)" >&2
-"$PYTHON" tools/analyze_audio.py "$TRACK" --out "$env" --fps "$FPS" --bands "$BANDS"
+"$PYTHON" forge/analyze_audio.py "$TRACK" --out "$env" --fps "$FPS" --bands "$BANDS"
 
 echo "videotrack: rendering cosmos ${WIDTH}x${HEIGHT} (substrate=$SUBSTRATE)" >&2
 # Build render flags as an array. Guard the expansion — on macOS bash 3.2,
@@ -86,7 +86,7 @@ render_flags=()
 [ "$HUD" = "1" ]  && render_flags+=(--hud)
 [ "$ATTR" = "1" ] && render_flags+=(--attribution)
 [ -n "$TITLE" ]   && render_flags+=(--title "$TITLE")
-"$NODE" tools/render_video.mjs --env "$env" --frames "$frames" \
+"$NODE" forge/render_video.mjs --env "$env" --frames "$frames" \
   --width "$WIDTH" --height "$HEIGHT" --fps "$FPS" --substrate "$SUBSTRATE" \
   ${render_flags[@]+"${render_flags[@]}"}
 

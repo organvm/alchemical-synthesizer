@@ -17,10 +17,14 @@ capture ─▶ broadcast (generative HLS) ─▶ 24/7 host (CF Containers + R2)
   `serve.js`, `Dockerfile`, `entrypoint.sh`, `wrangler.toml`, `rebroadcast.json`.
   The **complete, code-ready** unit; go-live is the gated `L-MEDIA-ARK-HOST`
   atom (Workers Paid $5/mo).
-- **Operator tools** (still in `tools/`):
+- **Operator tools** (in `tools/`):
   - **Container-coupled** (bundled/executed by the live image): `broadcast.sh`,
     `cellcycle.py`, `hls_append.py`, `r2_sync.sh`, `ingest_queue.py`.
   - **Host-side** (RTMP reach + lineage): `rebroadcast.sh`, `lineage.py`.
+- **Reused Forge tools** (Aether → Forge, allowed): `broadcast.sh` calls
+  `forge/tune.py` (submission capture) + `forge/bounce.sh` (SC-gated NRT tier), so
+  the `Dockerfile` `COPY`s those two into `/app/forge/`. Both degrade gracefully
+  if absent.
 
 Makefile targets: `broadcast rebroadcast submit stations`.
 

@@ -92,7 +92,7 @@ The contribution sits at the intersection of several established threads:
   Extensions dir and the class library recompiled.
 - Offline specimen generation: `~NRT_RENDERER.renderSpecimen(in, out)` via the
   Score system yields deterministic artifacts suitable for analysis.
-- Validation utilities: `tools/validate_audio.py`.
+- Validation utilities: `forge/validate_audio.py`.
 
 ## Future Work
 

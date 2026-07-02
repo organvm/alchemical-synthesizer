@@ -1,5 +1,5 @@
 {
-  "_comment": "AETHER source registry — where Brahma listens. Each entry routes one free/streaming audio source into the Forge. `license` drives publish-safety (see tools/tune.py PUBLISH_SAFE); `verified` records whether a capture has actually been pulled from the URL. Add a source = add ONE entry. RIGHTS POSTURE — whether a given source may be published/sold — is a human-gated decision (see ROADMAP 'Human-gated decision atoms'); this registry only records the license, it does not grant clearance.",
+  "_comment": "AETHER source registry — where Brahma listens. Each entry routes one free/streaming audio source into the Forge. `license` drives publish-safety (see forge/tune.py PUBLISH_SAFE); `verified` records whether a capture has actually been pulled from the URL. Add a source = add ONE entry. RIGHTS POSTURE — whether a given source may be published/sold — is a human-gated decision (see ROADMAP 'Human-gated decision atoms'); this registry only records the license, it does not grant clearance.",
   "stations": [
     {
       "name": "somafm-dronezone",

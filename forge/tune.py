@@ -17,16 +17,16 @@ automated pipeline (--publish-safe-only), but it never decides policy for you.
 
 Design notes:
   * stdlib only (+ ffmpeg on PATH), py3.14-safe — same constraint as
-    tools/analyze_audio.py / tools/stemforge.py (no venv).
+    forge/analyze_audio.py / forge/stemforge.py (no venv).
   * ffmpeg reads http/icecast/hls URLs directly; the --reconnect input options
     let a flaky stream self-heal mid-capture.
   * Output is stereo 44.1 kHz PCM by default — the same shape ingest.sh emits,
     so a capture flows straight into `make rip` / `make track`.
 
 Usage:
-    python3 tools/tune.py --list
-    python3 tools/tune.py --station somafm-dronezone [--secs 30] [--out out/tuned/x.wav]
-    python3 tools/tune.py --url https://host/stream --license cc0 \
+    python3 forge/tune.py --list
+    python3 forge/tune.py --station somafm-dronezone [--secs 30] [--out out/tuned/x.wav]
+    python3 forge/tune.py --url https://host/stream --license cc0 \
                           [--attribution "..."] [--secs 30] [--out ...]
 
 Exit codes: 0 ok · 2 usage · 3 ffmpeg missing · 4 capture failed · 5 unknown station

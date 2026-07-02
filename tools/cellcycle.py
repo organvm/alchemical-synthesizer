@@ -38,7 +38,7 @@ intended inner life. This module tags them as such (see PROVISIONAL) and the
 player labels them provisional. The legible proof of the wedge is the
 before/after specimen, not these numbers.
 
-Design constraints (match tools/tune.py / tools/analyze_audio.py):
+Design constraints (match forge/tune.py / forge/analyze_audio.py):
   * stdlib only, py3.14-safe (no venv, no third-party deps).
   * Deterministic given --seed, so it is testable and a run is reproducible.
 

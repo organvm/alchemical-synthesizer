@@ -3,16 +3,16 @@
 //  render_video.mjs — headless frame renderer for the Visual Cortex.
 // ----------------------------------------------------------------------------
 //  Runs the REAL p5 sketch (brahma/web/public) in headless Chrome via Puppeteer,
-//  injects a per-frame audio envelope (from tools/analyze_audio.py) as
+//  injects a per-frame audio envelope (from forge/analyze_audio.py) as
 //  window.__BRAHMA_VIDEO__, and steps the cosmos one deterministic frame at a
-//  time — writing frame_%06d.png for tools/videotrack.sh to mux with ffmpeg.
+//  time — writing frame_%06d.png for forge/videotrack.sh to mux with ffmpeg.
 //
-//  Puppeteer is a provisioned-on-demand tool (tools/setup-video.sh installs it
+//  Puppeteer is a provisioned-on-demand tool (forge/setup-video.sh installs it
 //  into brahma/web/node_modules, gitignored) — never in the committed manifest,
 //  so CI's `npm ci` never pulls Chromium. Resolved here via createRequire.
 //
 //  Usage:
-//    node tools/render_video.mjs --env env.json --frames DIR \
+//    node forge/render_video.mjs --env env.json --frames DIR \
 //         [--width 1080] [--height 1080] [--fps 30] [--substrate sound] [--hud] \
 //         [--attribution] [--title "Track Name"]
 //
@@ -55,7 +55,7 @@ function loadPuppeteer() {
     } catch (e) {
         console.error(
             "render_video: puppeteer not installed.\n" +
-            "  Run:  make video   (or: bash tools/setup-video.sh)\n" +
+            "  Run:  make video   (or: bash forge/setup-video.sh)\n" +
             `  (${e.message})`);
         process.exit(3);
     }
@@ -64,7 +64,7 @@ function loadPuppeteer() {
 async function main() {
     const args = parseArgs(process.argv.slice(2));
     if (!args.env || !args.frames) {
-        console.error("usage: node tools/render_video.mjs --env env.json --frames DIR [opts]");
+        console.error("usage: node forge/render_video.mjs --env env.json --frames DIR [opts]");
         process.exit(2);
     }
     if (!fs.existsSync(args.env)) {

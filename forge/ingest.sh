@@ -5,7 +5,7 @@
 # mp3/m4a — so every donor song is first normalized to 44.1 kHz PCM. We emit
 # both a stereo and a mono rendering so downstream stages can pick.
 #
-#   Usage:  tools/ingest.sh <input-audio> [outdir]
+#   Usage:  forge/ingest.sh <input-audio> [outdir]
 #   Emits:  <outdir>/<name>.wav       (stereo, 44.1k, 16-bit)
 #           <outdir>/<name>.mono.wav   (mono,   44.1k, 16-bit)
 #   Prints: the stereo WAV path on stdout (for pipelines).

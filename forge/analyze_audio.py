@@ -11,12 +11,12 @@ onsets fire the Lightning Flash.
 
 Design notes:
   * stdlib only (+ ffmpeg on PATH) so it runs under the machine's Python 3.14
-    with no venv, exactly like tools/stemforge.py.
+    with no venv, exactly like forge/stemforge.py.
   * The measures — RMS, log-spaced band energies, spectral flatness — mirror the
     engine's own analysis SynthDef (relinquished_ae: env / tone / noise).
 
 Usage:
-    python3 tools/analyze_audio.py TRACK.wav --out env.json [--fps 30] [--bands 12]
+    python3 forge/analyze_audio.py TRACK.wav --out env.json [--fps 30] [--bands 12]
 
 Exit codes: 0 ok · 2 usage · 3 ffmpeg missing / decode failed
 """

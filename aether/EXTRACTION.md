@@ -18,7 +18,7 @@ Move the [core files](MANIFEST.md#core--aethers-own-code-extraction-candidates) 
 git mv deploy/aether                         aether/deploy
 mkdir -p aether/tools aether/web aether/docs
 git mv tools/broadcast.sh tools/rebroadcast.sh tools/hls_append.py \
-       tools/ingest_queue.py tools/r2_sync.sh tools/tune.py \
+       tools/ingest_queue.py tools/r2_sync.sh forge/tune.py \
        tools/cellcycle.py tools/lineage.py                     aether/tools/
 git mv brahma/web/public/aether                aether/web/listener
 git mv stations.json                           aether/stations.json

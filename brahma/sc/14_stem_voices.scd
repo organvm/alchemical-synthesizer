@@ -22,7 +22,7 @@
   Private buses are NOT auto-cleared between blocks, so the head clear node is
   what keeps the summing bus from accumulating across blocks.
 
-  Driven from tools/stemforge.py, which reads forge/recipes/<name>/recipe.json,
+  Driven from forge/stemforge.py, which reads forge/recipes/<name>/recipe.json,
   picks a voice per stem, normalizes each to stereo 44.1k, and calls:
 
       Server.program = "/…/scsynth";

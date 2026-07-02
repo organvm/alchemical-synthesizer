@@ -38,7 +38,7 @@ serve:
 
 validate:
 	@test -n "$(FILE)" || { echo "usage: make validate FILE=path/to.wav"; exit 1; }
-	python3 tools/validate_audio.py "$(FILE)"
+	python3 forge/validate_audio.py "$(FILE)"
 
 clean:
 	rm -rf dist brahma/web/node_modules
@@ -50,34 +50,34 @@ clean:
 # free/streaming web source into a Forge-ready WAV (+ a provenance sidecar).
 # Rights posture is human-gated — captures are license-tagged, not cleared.
 stations:
-	python3 tools/tune.py --list
+	python3 forge/tune.py --list
 
 tune:
 	@test -n "$(STATION)" || test -n "$(URL)" || \
 		{ echo "usage: make tune STATION=somafm-dronezone [SECS=30] [OUT=out/tuned/x.wav]"; \
 		  echo "   or: make tune URL=https://host/stream [LICENSE=cc0] [SECS=30] [OUT=...]"; exit 1; }
-	python3 tools/tune.py $(if $(STATION),--station $(STATION),) $(if $(URL),--url "$(URL)",) \
+	python3 forge/tune.py $(if $(STATION),--station $(STATION),) $(if $(URL),--url "$(URL)",) \
 		$(if $(SECS),--secs $(SECS),) $(if $(LICENSE),--license $(LICENSE),) $(if $(OUT),--out "$(OUT)",)
 
 rip:
 	@test -n "$(SONG)" || { echo "usage: make rip SONG=song.mp3 [NAME=song]"; exit 1; }
-	python3 tools/rip.py "$(SONG)" $(if $(NAME),--name $(NAME),)
+	python3 forge/rip.py "$(SONG)" $(if $(NAME),--name $(NAME),)
 
 forge:
 	@test -n "$(NAME)" && test -n "$(DRUMS)" && test -n "$(MELODY)" || \
 		{ echo "usage: make forge NAME=x DRUMS=a/drums.wav MELODY=b/other.wav [BASS=..] [VOCALS=..]"; exit 1; }
-	bash tools/forge.sh --name $(NAME) --drums "$(DRUMS)" --melody "$(MELODY)" \
+	bash forge/forge.sh --name $(NAME) --drums "$(DRUMS)" --melody "$(MELODY)" \
 		$(if $(BASS),--bass "$(BASS)",) $(if $(VOCALS),--vocals "$(VOCALS)",) --mix
 
 render:
 	@test -n "$(SONG)" && test -n "$(OUT)" || { echo "usage: make render SONG=in.wav OUT=out.wav [DUR=12]"; exit 1; }
-	bash tools/bounce.sh "$(SONG)" "$(OUT)" $(DUR)
+	bash forge/bounce.sh "$(SONG)" "$(OUT)" $(DUR)
 
 track:
 	@test -n "$(NAME)" && test -n "$(DRUMS)" && test -n "$(MELODY)" && test -n "$(OUT)" || \
 		{ echo "usage: make track NAME=x DRUMS=a/drums.wav MELODY=b/other.wav OUT=out/x.wav [DUR=12]"; exit 1; }
-	bash tools/forge.sh --name $(NAME) --drums "$(DRUMS)" --melody "$(MELODY)" --mix
-	bash tools/bounce.sh forge/recipes/$(NAME)/premix.wav "$(OUT)" $(DUR)
+	bash forge/forge.sh --name $(NAME) --drums "$(DRUMS)" --melody "$(MELODY)" --mix
+	bash forge/bounce.sh forge/recipes/$(NAME)/premix.wav "$(OUT)" $(DUR)
 
 # stemtrack: like track, but render EACH stem through its own creature-voice and
 # sum under a master limiter (drums->ossuary, bass->mnemosyne, vocals->chrysalid,
@@ -85,32 +85,32 @@ track:
 stemtrack:
 	@test -n "$(NAME)" && test -n "$(DRUMS)" && test -n "$(MELODY)" && test -n "$(OUT)" || \
 		{ echo "usage: make stemtrack NAME=x DRUMS=a/drums.wav MELODY=b/other.wav OUT=out/x.wav [BASS=..] [VOCALS=..] [MAP=drums=ossuary] [DUR=12]"; exit 1; }
-	bash tools/forge.sh --name $(NAME) --drums "$(DRUMS)" --melody "$(MELODY)" \
+	bash forge/forge.sh --name $(NAME) --drums "$(DRUMS)" --melody "$(MELODY)" \
 		$(if $(BASS),--bass "$(BASS)",) $(if $(VOCALS),--vocals "$(VOCALS)",)
-	python3 tools/stemforge.py $(NAME) --out "$(OUT)" $(if $(DUR),--dur $(DUR),) $(if $(MAP),--map $(MAP),)
+	python3 forge/stemforge.py $(NAME) --out "$(OUT)" $(if $(DUR),--dur $(DUR),) $(if $(MAP),--map $(MAP),)
 
 demucs:
-	bash tools/setup-demucs.sh
+	bash forge/setup-demucs.sh
 
 # videotrack: a rendered track -> a matching audio-reactive video. Analyzes the
 # audio into a per-frame envelope, drives the Etz Chaim cosmos headlessly, and
 # muxes frames + audio into a post-ready mp4. Needs `make video` first.
 videotrack:
 	@test -n "$(TRACK)" || { echo "usage: make videotrack TRACK=out/heist.wav [OUT=out/heist.mp4] [FPS=30] [WIDTH=1080] [HEIGHT=1080] [SUBSTRATE=sound]"; exit 1; }
-	bash tools/videotrack.sh --track "$(TRACK)" \
+	bash forge/videotrack.sh --track "$(TRACK)" \
 		$(if $(OUT),--out "$(OUT)",) $(if $(FPS),--fps $(FPS),) \
 		$(if $(WIDTH),--width $(WIDTH),) $(if $(HEIGHT),--height $(HEIGHT),) \
 		$(if $(SUBSTRATE),--substrate $(SUBSTRATE),)
 
 video:
-	bash tools/setup-video.sh
+	bash forge/setup-video.sh
 
 # package: a rendered track -> a social-ready bundle (video + cover + caption) in
 # out/pkg/<base>/. Burns a "made with Brahma" mark into the clip and picks the
 # peak-energy frame as the cover. Set BRAHMA_LINK to bake your funnel URL in.
 package:
 	@test -n "$(TRACK)" || { echo "usage: make package TRACK=out/heist.wav [TITLE=\"Heist\"] [LINK=https://...] [SUBSTRATE=sound]"; exit 1; }
-	bash tools/package.sh --track "$(TRACK)" \
+	bash forge/package.sh --track "$(TRACK)" \
 		$(if $(TITLE),--title "$(TITLE)",) $(if $(LINK),--link "$(LINK)",) \
 		$(if $(SUBSTRATE),--substrate $(SUBSTRATE),) $(if $(FPS),--fps $(FPS),)
 

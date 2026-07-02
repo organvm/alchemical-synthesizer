@@ -18,7 +18,7 @@ rather than physically consolidated — see the honest note below.
 | Piece | Where it lives today | Role |
 |-------|----------------------|------|
 | Deploy unit | [`deploy/aether/`](../deploy/aether/) | Cloudflare **Containers** worker for the 24/7 radio (`aether-radio`), R2 segment bucket, `serve.js`, `Dockerfile`, `entrypoint.sh` |
-| Broadcast tooling | `tools/broadcast.sh`, `tools/rebroadcast.sh`, `tools/hls_append.py`, `tools/ingest_queue.py`, `tools/r2_sync.sh`, `tools/cellcycle.py`, `tools/lineage.py`, `tools/tune.py` | Segmented-NRT → live HLS, RTMP push, station tuning, ingest queue, lineage |
+| Broadcast tooling | `tools/broadcast.sh`, `tools/rebroadcast.sh`, `tools/hls_append.py`, `tools/ingest_queue.py`, `tools/r2_sync.sh`, `tools/cellcycle.py`, `tools/lineage.py`, `forge/tune.py` | Segmented-NRT → live HLS, RTMP push, station tuning, ingest queue, lineage |
 | Web UI | [`brahma/web/public/aether/`](../brahma/web/public/aether/) | The listener page (`aether.js`, `index.html`) |
 | Stations | [`stations.json`](../stations.json) | The tunable source registry |
 | Plan / docs | [`docs/AETHER-BROADCAST-PLAN.md`](../docs/AETHER-BROADCAST-PLAN.md) | Broadcast architecture |
