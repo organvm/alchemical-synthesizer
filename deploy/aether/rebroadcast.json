@@ -1,0 +1,14 @@
+{
+  "_note": "The RTMP re-broadcast contract (AETHER plan §5.5) — converges the remote-broadcast.json idiom (bitrate ladder + audio chain) referenced in the excavation. The sovereign HLS stream stays the home; this is a ONE-WAY lure that points back to it. Stream keys are organ-owned credentials, read from env RTMP_KEY — NEVER stored here.",
+  "targets": {
+    "youtube": { "url": "rtmp://a.rtmp.youtube.com/live2", "note": "key from env RTMP_KEY (YouTube Studio → Go Live → Stream key)" },
+    "twitch":  { "url": "rtmp://live.twitch.tv/app",       "note": "key from env RTMP_KEY (Twitch dashboard → Stream key)" }
+  },
+  "video": {
+    "codec": "libx264", "preset": "veryfast", "pix_fmt": "yuv420p",
+    "bitrate": "2500k", "maxrate": "2500k", "bufsize": "5000k",
+    "fps": 30, "width": 1280, "height": 720, "gop": 60
+  },
+  "audio": { "codec": "aac", "bitrate": "160k", "samplerate": 44100, "channels": 2 },
+  "visualizer": { "mode": "showspectrum", "color": "intensity", "accent": "0x7ba7ff" }
+}

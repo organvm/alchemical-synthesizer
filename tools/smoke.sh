@@ -149,10 +149,29 @@ else
 fi
 for sh in tools/forge.sh tools/bounce.sh tools/ingest.sh tools/setup-demucs.sh \
           tools/videotrack.sh tools/setup-video.sh tools/package.sh tools/broadcast.sh \
-          tools/r2_sync.sh deploy/aether/entrypoint.sh tools/smoke.sh; do
+          tools/r2_sync.sh tools/rebroadcast.sh deploy/aether/entrypoint.sh tools/smoke.sh; do
   [ -f "$sh" ] || continue
   if bash -n "$sh" >/dev/null 2>&1; then ok "bash -n $sh"; else bad "bash -n $sh"; fi
 done
+# AETHER Reach: the RTMP re-broadcast contract must parse, and the encode pipeline
+# (audio -> visualizer video -> FLV) must actually produce a stream (dry-run, no
+# push, no key). Uses showwaves (most portable ffmpeg filter).
+if [ -f deploy/aether/rebroadcast.json ] && command -v python3 >/dev/null 2>&1; then
+  if python3 -c 'import json,sys; c=json.load(open("deploy/aether/rebroadcast.json")); sys.exit(0 if c.get("targets") and c.get("video") and c.get("audio") else 1)' >/dev/null 2>&1; then
+    ok "rebroadcast.json valid (targets + video + audio)"
+  else
+    bad "rebroadcast.json malformed or missing targets/video/audio"
+  fi
+fi
+if [ -f tools/rebroadcast.sh ] && command -v ffmpeg >/dev/null 2>&1; then
+  RB="$(mktemp -d)/preview.flv"
+  if bash tools/rebroadcast.sh --dry-run "$RB" --mode showwaves >/tmp/brahma_rb.log 2>&1 && [ -s "$RB" ]; then
+    ok "rebroadcast.sh --dry-run encodes a FLV (audio->visualizer->flv)"
+  else
+    bad "rebroadcast.sh --dry-run (see /tmp/brahma_rb.log)"; tail -5 /tmp/brahma_rb.log
+  fi
+  rm -f "$RB"
+fi
 # AETHER 24/7 sovereign host (deploy/aether): the container deploy unit must be
 # structurally sound even though the image build + wrangler deploy are gated.
 if [ -f deploy/aether/wrangler.toml ] && command -v python3 >/dev/null 2>&1; then

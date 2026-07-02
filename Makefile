@@ -17,10 +17,11 @@
 #   make videotrack track -> matching visual clip:  make videotrack TRACK=out/heist.wav [OUT=out/heist.mp4] [FPS=30] [WIDTH=1080] [HEIGHT=1080] [SUBSTRATE=sound]
 #   make package   track -> social-ready bundle:     make package TRACK=out/heist.wav [TITLE="Heist"] [LINK=https://...] [SUBSTRATE=sound]
 #   make broadcast AETHER live radio (segmented-NRT -> live HLS):  make broadcast [SOURCE=out/tuned/x.wav] [SEGMENTS=0] [SECONDS=..] [SEED=1] [PERIOD=12]
+#   make rebroadcast push the stream to YouTube/Twitch (RTMP lure):  make rebroadcast TARGET=youtube (key via env RTMP_KEY) | make rebroadcast DRYRUN=out/preview.flv
 #   make demucs    install TRUE separation (htdemucs) for higher-quality rips
 #   make video     install headless video export (puppeteer) for videotrack
 
-.PHONY: help smoke dist serve validate clean stations tune rip forge render track stemtrack videotrack package broadcast demucs video
+.PHONY: help smoke dist serve validate clean stations tune rip forge render track stemtrack videotrack package broadcast rebroadcast demucs video
 
 help:
 	@grep -E '^#   make ' Makefile | sed 's/^#   /  /'
@@ -122,3 +123,11 @@ broadcast:
 		$(if $(SOURCE),--source "$(SOURCE)",) $(if $(SEGMENTS),--segments $(SEGMENTS),) \
 		$(if $(SECONDS),--seconds $(SECONDS),) $(if $(SEED),--seed $(SEED),) \
 		$(if $(PERIOD),--period $(PERIOD),) $(if $(OUT),--out "$(OUT)",)
+
+# rebroadcast: the "Reach" lure — push the sovereign stream to YouTube/Twitch over
+# RTMP (ffmpeg synthesizes a visualizer video from the audio). The stream key is
+# an organ-owned credential (env RTMP_KEY, never recited). DRYRUN= renders a local
+# preview .flv with no push and no key.
+rebroadcast:
+	bash tools/rebroadcast.sh $(if $(TARGET),--target $(TARGET),) $(if $(URL),--url "$(URL)",) \
+		$(if $(INPUT),--input "$(INPUT)",) $(if $(MODE),--mode $(MODE),) $(if $(DRYRUN),--dry-run "$(DRYRUN)",)
