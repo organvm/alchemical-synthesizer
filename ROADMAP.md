@@ -141,9 +141,19 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
       scene_version) + `node --check` in smoke.* Device-gated extensions
       (deferred): realtime scsynth **audio capture** (needs BlackHole/JACK) and a
       full THREE.js 3D orb.
-- [ ] **Reach** — *[increment 5]* RTMP re-broadcast lure to YouTube/Twitch
-      (converge the livestream-framework CDN sink). The sovereign HLS stream stays
-      the home.
+- [x] **Reach** — *[increment 5]* a one-way RTMP re-broadcast **lure**:
+      `tools/rebroadcast.sh` re-encodes the sovereign HLS stream to FLV/RTMP and
+      pushes it to YouTube/Twitch, converging the `remote-broadcast.json` contract
+      (`deploy/aether/rebroadcast.json`: bitrate ladder + audio chain +
+      endpoints). Since the stream is audio-first, ffmpeg **synthesizes** the
+      required video track from the audio (showspectrum / showwaves / showcqt) —
+      no separate render. The stream key is an organ-owned credential (env
+      `RTMP_KEY`, never recited); absent key → refuses (exit 4). `make
+      rebroadcast TARGET=youtube` | `DRYRUN=…` for a keyless local preview.
+      *Verified: `--dry-run` produces a real H.264+AAC FLV (showspectrum +
+      showwaves), no-key refusal, `bash -n` + contract-valid + dry-run encode all
+      in smoke.* The sovereign HLS stream stays the home; the RTMP push is the
+      lure. First live push needs the platform stream key (the one gated atom).
 - [ ] **Ω — Ouroboros** — *[increment 6]* viewers submit a stream URL → a creature
       eats it live; a lineage browser; the "consume you back" loop; then
       substrate-agnostic (absorb non-audio). *"Output re-enters as input."*
