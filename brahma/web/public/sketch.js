@@ -30,6 +30,20 @@ let hovered = null;
 
 // --------------------------------------------------------------------- setup
 function setup() {
+    // Headless video export: fixed canvas, frame clock, stepped on demand by
+    // tools/render_video.mjs. No OSC/WebSocket, no realtime loop.
+    if (Video.isActive()) {
+        const d = Video.dims();
+        createCanvas(d.w, d.h);
+        pixelDensity(1);
+        background(0);
+        Void.seed(width, height);
+        Video.installClock();
+        noLoop();
+        window.__brahmaRenderFrame = (i) => { Video.setFrame(i); redraw(); };
+        window.__brahmaReady = true;
+        return;
+    }
     createCanvas(windowWidth, windowHeight);
     pixelDensity(1);
     background(0);
@@ -82,8 +96,13 @@ function draw() {
     const dt = Math.min(0.05, (now - lastFrameMs) / 1000) || 0.016;
     lastFrameMs = now;
 
-    // Self-emanation when SuperCollider is silent.
-    DemoStream.tick(organisms, emitOrganism);
+    // Emanation source: the audio envelope (video export) or, when the engine
+    // is silent, the self-emanating demo stream.
+    if (Video.isActive()) {
+        Video.apply(organisms, emitOrganism, Video.currentFrame());
+    } else {
+        DemoStream.tick(organisms, emitOrganism);
+    }
 
     // Decay: a vessel forgets an organism unheard for 2 seconds.
     for (const id in organisms) {
@@ -154,18 +173,22 @@ function draw() {
     ];
 
     // --- HUD -------------------------------------------------------------
-    Hud.drawTitle();
-    Hud.drawSubstrate(Substrates.LIST, Substrates.active(), axisVals);
-    Hud.drawStatus({
-        live: !DemoStream.isActive(),
-        litCount: stats.litCount,
-        orgCount: Object.keys(organisms).length,
-        maxDepth: settings.maxDepth,
-        ouroboros: settings.ouroboros,
-        multiverse: settings.multiverse
-    });
-    Hud.drawTooltip(hovered);
-    Hud.drawHelp(settings.showHelp);
+    // A clean export shows pure cosmos; the dev overlay is suppressed in video
+    // mode unless explicitly requested (__BRAHMA_VIDEO__.hud).
+    if (!Video.isActive() || Video.wantHud()) {
+        Hud.drawTitle();
+        Hud.drawSubstrate(Substrates.LIST, Substrates.active(), axisVals);
+        Hud.drawStatus({
+            live: !DemoStream.isActive(),
+            litCount: stats.litCount,
+            orgCount: Object.keys(organisms).length,
+            maxDepth: settings.maxDepth,
+            ouroboros: settings.ouroboros,
+            multiverse: settings.multiverse
+        });
+        Hud.drawTooltip(hovered);
+        Hud.drawHelp(settings.showHelp);
+    }
 }
 
 function systemStats() {

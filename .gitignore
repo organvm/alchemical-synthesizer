@@ -3,6 +3,9 @@ node_modules/
 *.swp
 *.wav
 *.aiff
+*.mp4
+*.mov
+*.webm
 
 # IDE / editor
 .vscode/
