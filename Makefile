@@ -7,6 +7,8 @@
 #   make clean     remove build output and installed web deps
 #
 #   -- The Forge: sample -> track pipeline --
+#   make stations  list the AETHER source registry (where Brahma listens)
+#   make tune      listen: capture free/web audio:  make tune STATION=somafm-dronezone [SECS=30] | make tune URL=https://... [LICENSE=cc0]
 #   make rip       rip a song into stems:        make rip SONG=song.mp3 [NAME=song]
 #   make forge     recombine stolen stems:        make forge NAME=heist DRUMS=a/drums.wav MELODY=b/other.wav
 #   make render    Brahma re-expresses a WAV:      make render SONG=in.wav OUT=out.wav [DUR=12]
@@ -17,7 +19,7 @@
 #   make demucs    install TRUE separation (htdemucs) for higher-quality rips
 #   make video     install headless video export (puppeteer) for videotrack
 
-.PHONY: help smoke dist serve validate clean rip forge render track stemtrack videotrack package demucs video
+.PHONY: help smoke dist serve validate clean stations tune rip forge render track stemtrack videotrack package demucs video
 
 help:
 	@grep -E '^#   make ' Makefile | sed 's/^#   /  /'
@@ -39,6 +41,20 @@ clean:
 	rm -rf dist brahma/web/node_modules
 
 # ---- The Forge: sample -> track pipeline ----
+
+# stations / tune: the "listen" mouth of the Forge (AETHER). `make stations`
+# lists the license-tagged source registry; `make tune` captures a slice of a
+# free/streaming web source into a Forge-ready WAV (+ a provenance sidecar).
+# Rights posture is human-gated — captures are license-tagged, not cleared.
+stations:
+	python3 tools/tune.py --list
+
+tune:
+	@test -n "$(STATION)" || test -n "$(URL)" || \
+		{ echo "usage: make tune STATION=somafm-dronezone [SECS=30] [OUT=out/tuned/x.wav]"; \
+		  echo "   or: make tune URL=https://host/stream [LICENSE=cc0] [SECS=30] [OUT=...]"; exit 1; }
+	python3 tools/tune.py $(if $(STATION),--station $(STATION),) $(if $(URL),--url "$(URL)",) \
+		$(if $(SECS),--secs $(SECS),) $(if $(LICENSE),--license $(LICENSE),) $(if $(OUT),--out "$(OUT)",)
 
 rip:
 	@test -n "$(SONG)" || { echo "usage: make rip SONG=song.mp3 [NAME=song]"; exit 1; }

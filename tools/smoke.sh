@@ -113,10 +113,21 @@ fi
 
 echo "=== [6/6] Forge tools syntax (py_compile + bash -n) ==="
 if command -v python3 >/dev/null 2>&1; then
-  for py in tools/rip.py tools/stemforge.py tools/analyze_audio.py tools/validate_audio.py tools/gen_test_tone.py; do
+  for py in tools/rip.py tools/stemforge.py tools/analyze_audio.py tools/validate_audio.py tools/gen_test_tone.py tools/tune.py; do
     [ -f "$py" ] || continue
     if python3 -m py_compile "$py" >/tmp/brahma_pyc.log 2>&1; then ok "py_compile $py"; else bad "py_compile $py (see /tmp/brahma_pyc.log)"; tail -5 /tmp/brahma_pyc.log; fi
   done
+  # AETHER source registry: must parse, and EVERY station must carry a license
+  # (a source with no license tag could silently slip the publish-safety guard).
+  if [ -f stations.json ]; then
+    if python3 -c 'import json,sys; d=json.load(open("stations.json")); s=d.get("stations",[]); sys.exit(0 if s and all(x.get("license") and x.get("url") and x.get("name") for x in s) else 1)' >/dev/null 2>&1; then
+      ok "stations.json: all sources carry name+url+license"
+    else
+      bad "stations.json: malformed or a source is missing name/url/license"
+    fi
+    # tune.py --list must run against the registry without error.
+    if python3 tools/tune.py --list >/dev/null 2>&1; then ok "tune.py --list"; else bad "tune.py --list"; fi
+  fi
 else
   skip "python3 not installed — Forge py syntax"
 fi
