@@ -13,7 +13,8 @@
 //
 //  Usage:
 //    node tools/render_video.mjs --env env.json --frames DIR \
-//         [--width 1080] [--height 1080] [--fps 30] [--substrate sound] [--hud]
+//         [--width 1080] [--height 1080] [--fps 30] [--substrate sound] [--hud] \
+//         [--attribution] [--title "Track Name"]
 //
 //  Exit: 0 ok · 2 usage · 3 puppeteer missing · 4 render failure
 // ============================================================================
@@ -29,7 +30,8 @@ const WEB_ROOT = path.join(REPO_ROOT, "brahma", "web");
 const INDEX_HTML = path.join(WEB_ROOT, "public", "index.html");
 
 function parseArgs(argv) {
-    const a = { width: 1080, height: 1080, fps: 30, substrate: "sound", hud: false };
+    const a = { width: 1080, height: 1080, fps: 30, substrate: "sound", hud: false,
+                attribution: false, title: "" };
     for (let i = 0; i < argv.length; i++) {
         const k = argv[i];
         if (k === "--env") a.env = argv[++i];
@@ -39,6 +41,8 @@ function parseArgs(argv) {
         else if (k === "--fps") a.fps = parseInt(argv[++i], 10);
         else if (k === "--substrate") a.substrate = argv[++i];
         else if (k === "--hud") a.hud = true;
+        else if (k === "--attribution") a.attribution = true;
+        else if (k === "--title") a.title = argv[++i];
         else { console.error(`render_video: unknown arg ${k}`); process.exit(2); }
     }
     return a;
@@ -86,6 +90,8 @@ async function main() {
         height: args.height,
         substrate: args.substrate,
         hud: args.hud,
+        attribution: args.attribution,
+        title: args.title,
         env: envelope.env,
     };
 

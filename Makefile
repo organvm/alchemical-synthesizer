@@ -13,10 +13,11 @@
 #   make track     stems -> re-expressed track:    make track NAME=heist DRUMS=a/drums.wav MELODY=b/other.wav OUT=out/heist.wav [DUR=12]
 #   make stemtrack per-stem modular render:         make stemtrack NAME=heist DRUMS=a/drums.wav MELODY=b/other.wav OUT=out/heist.wav [MAP=drums=ossuary,other=janiform] [DUR=12]
 #   make videotrack track -> matching visual clip:  make videotrack TRACK=out/heist.wav [OUT=out/heist.mp4] [FPS=30] [WIDTH=1080] [HEIGHT=1080] [SUBSTRATE=sound]
+#   make package   track -> social-ready bundle:     make package TRACK=out/heist.wav [TITLE="Heist"] [LINK=https://...] [SUBSTRATE=sound]
 #   make demucs    install TRUE separation (htdemucs) for higher-quality rips
 #   make video     install headless video export (puppeteer) for videotrack
 
-.PHONY: help smoke dist serve validate clean rip forge render track stemtrack videotrack demucs video
+.PHONY: help smoke dist serve validate clean rip forge render track stemtrack videotrack package demucs video
 
 help:
 	@grep -E '^#   make ' Makefile | sed 's/^#   /  /'
@@ -84,3 +85,12 @@ videotrack:
 
 video:
 	bash tools/setup-video.sh
+
+# package: a rendered track -> a social-ready bundle (video + cover + caption) in
+# out/pkg/<base>/. Burns a "made with Brahma" mark into the clip and picks the
+# peak-energy frame as the cover. Set BRAHMA_LINK to bake your funnel URL in.
+package:
+	@test -n "$(TRACK)" || { echo "usage: make package TRACK=out/heist.wav [TITLE=\"Heist\"] [LINK=https://...] [SUBSTRATE=sound]"; exit 1; }
+	bash tools/package.sh --track "$(TRACK)" \
+		$(if $(TITLE),--title "$(TITLE)",) $(if $(LINK),--link "$(LINK)",) \
+		$(if $(SUBSTRATE),--substrate $(SUBSTRATE),) $(if $(FPS),--fps $(FPS),)
