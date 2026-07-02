@@ -14,7 +14,15 @@
 #   3. python3.12 / python3.11 / python3.10 venv
 #
 # After install, rip.py auto-detects demucs and switches to Tier 1 with no flags.
+#
+# We also install torchcodec: torchaudio >= 2.9 removed its built-in audio I/O
+# backends and routes save/load through TorchCodec (which links the system
+# FFmpeg's libav*). Without it demucs separates fine but fails at the save step
+# ('ModuleNotFoundError: torchcodec'). Requires a system ffmpeg on PATH.
 set -euo pipefail
+
+# What each installer pulls in: demucs (the model) + torchcodec (torchaudio I/O).
+DEMUCS_PKGS="demucs torchcodec"
 
 echo "setup-demucs: provisioning true source separation (htdemucs)…"
 
@@ -22,10 +30,9 @@ try_uv() {
   command -v uv >/dev/null 2>&1 || return 1
   echo "  -> uv detected: creating a torch-capable env (.venv-demucs on Python 3.11)"
   uv venv --python 3.11 .venv-demucs
-  # torch CPU wheels + demucs
-  uv pip install --python .venv-demucs/bin/python demucs
-  echo "  installed. rip.py will find: $(pwd)/.venv-demucs/bin/python"
-  echo "  (add it to rip.py's CANDIDATE_PYTHONS or symlink onto PATH if not auto-found)"
+  # torch CPU wheels + demucs + torchcodec (torchaudio I/O backend)
+  uv pip install --python .venv-demucs/bin/python $DEMUCS_PKGS
+  echo "  installed. rip.py auto-discovers: $(pwd)/.venv-demucs/bin/python"
   return 0
 }
 
@@ -33,6 +40,7 @@ try_pipx() {
   command -v pipx >/dev/null 2>&1 || return 1
   echo "  -> pipx detected: installing demucs as an isolated app"
   pipx install demucs
+  pipx inject demucs torchcodec   # torchaudio >= 2.9 I/O backend
   return 0
 }
 
@@ -45,7 +53,7 @@ try_venv() {
   echo "  -> $py detected: creating .venv-demucs"
   "$py" -m venv .venv-demucs
   ./.venv-demucs/bin/python -m pip install --upgrade pip
-  ./.venv-demucs/bin/python -m pip install demucs
+  ./.venv-demucs/bin/python -m pip install $DEMUCS_PKGS
   echo "  installed at $(pwd)/.venv-demucs/bin/python"
   return 0
 }

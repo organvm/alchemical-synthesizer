@@ -31,9 +31,12 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
       no audio device (`brahma/sc/13_nrt_renderer.scd` + `tools/bounce.sh`).
       *Verified on SuperCollider 3.14.1.*
 - [x] **Cadence** — one command from two stems to a track: `make track`. *Verified.*
-- [ ] **Tier-1 separation live** — provision demucs (`tools/setup-demucs.sh`) so
-      rips are true drum/melody theft, not band-splits. *(blocked: torch has no
-      wheel for this box's Python 3.14 → install on 3.11 via uv/venv.)*
+- [x] **Tier-1 separation live** — demucs (htdemucs) provisioned on Python 3.11
+      via `tools/setup-demucs.sh` (uv → `.venv-demucs`, incl. `torchcodec` for the
+      torchaudio ≥2.9 I/O backend); `rip.py` auto-discovers the venv (repo-local
+      or `$BRAHMA_DEMUCS_PYTHON`) and switches to true drum/melody theft with no
+      flags. *Verified on-machine: a tonal input routed to `other` @ −13.5 dB,
+      drums/bass/vocals @ ≤ −71 dB — true source split, not a band-split.*
 - [x] **Per-stem render** — feed each stem to a distinct creature (drums→Ossuary,
       bass→Mnemosyne, vocals→Chrysalid, melody→Prima) via a multi-buffer Score
       that sums the voices under a master limiter, instead of a single premix
