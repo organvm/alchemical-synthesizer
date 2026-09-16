@@ -172,11 +172,15 @@ async function renderAccount(){
 $("#ac-use-key").onclick = async () => {
   const input = $("#ac-existing-key");
   const key = input.value.trim();
+  const email = session.email;
   input.value = "";
   if(!key) return;
   const result = await api("/api/v1/account/usage", { headers: { Authorization: "Bearer " + key } });
-  if(!result.ok){ $("#ac-key-msg").textContent="API key was not accepted."; return; }
-  session.set(key, session.email);
+  if(session.email !== email) return;
+  if(!result.ok || result.data.ownerEmail !== email.toLowerCase()){
+    $("#ac-key-msg").textContent="Enter an active API key for this account."; return;
+  }
+  session.set(key, email);
   $("#ac-key-msg").textContent="Key active for this page session.";
   renderAccount(); refreshOverview();
 };

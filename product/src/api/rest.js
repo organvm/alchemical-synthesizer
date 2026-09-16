@@ -124,12 +124,14 @@ router.post("/account/keys", meter({ cost: 0 }), (req, res) =>
   ok(res, { ...licensing.issueApiKey(req.auth.ownerEmail, req.auth.plan, req.body.label || "key") }));
 
 router.post("/account/keys/revoke", meter({ cost: 0 }), (req, res) => {
+  const target = licensing.resolveApiKey(req.body.key);
+  if (!target || target.ownerEmail !== req.auth.ownerEmail) return fail(res, 403, "key_not_owned");
   licensing.revokeApiKey(req.body.key);
   ok(res, { revoked: true });
 });
 
 router.get("/account/usage", meter({ cost: 0 }), (req, res) =>
-  ok(res, { plan: req.auth.plan, usage: req.auth.usage, quota: req.auth.quota }));
+  ok(res, { ownerEmail: req.auth.ownerEmail, plan: req.auth.plan, usage: req.auth.usage, quota: req.auth.quota }));
 
 // ---- plans & billing ----
 router.get("/plans", (req, res) => ok(res, listPlans()));
