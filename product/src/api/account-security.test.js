@@ -17,6 +17,12 @@ test("key identity and revocation stay bound to the authenticated account", { ti
   await new Promise((resolve) => server.once("listening", resolve));
   const base = `http://127.0.0.1:${server.address().port}/api/v1`;
   try {
+    const queryOnly = await fetch(base + "/account/usage?api_key=" + encodeURIComponent(alice.key));
+    assert.equal(queryOnly.status, 401);
+    await queryOnly.text();
+    const headerKey = await fetch(base + "/account/usage", { headers: { "x-api-key": alice.key } });
+    assert.equal(headerKey.status, 200);
+    await headerKey.text();
     const headers = { Authorization: "Bearer " + alice.key, "content-type": "application/json" };
     const usage = await fetch(base + "/account/usage", { headers });
     assert.equal((await usage.json()).data.ownerEmail, "alice@example.test");
