@@ -47,11 +47,22 @@ function interpret(text) {
   } catch (_) { /* not JSON, fall through */ }
 
   const lower = raw.toLowerCase();
+  const lines = lower.split(/[\n\r\u2028\u2029]/);
+  // Find the first command once, then scan its suffix once. Repeated command
+  // words must not cause a fresh scan of the remaining prompt at every offset.
+  const afterWord = (line, command, target) => {
+    const match = command.exec(line);
+    return match ? target.exec(line.slice(match.index + match[0].length)) : null;
+  };
   if (/\b(state|status|telemetry|organism)\b/.test(lower)) return { action: "get_organism_state", args: {} };
-  if (/\blist\b.*\b(specimen|marketplace)\b/.test(lower)) return { action: "list_specimens", args: {} };
-  if (/\b(list|show|catalog)\b.*\bmodule/.test(lower) || lower === "list modules") return { action: "list_modules", args: {} };
+  if (lines.some((line) => afterWord(line, /\blist\b/, /\b(specimen|marketplace)\b/))) return { action: "list_specimens", args: {} };
+  if (lines.some((line) => afterWord(line, /\b(list|show|catalog)\b/, /\bmodule/))) return { action: "list_modules", args: {} };
   // "render from <module>" / "render of <module>" / "render <module>"
-  let render = lower.match(/\brender\b.*?\b(?:from|of|with)\s+(?:the\s+)?([a-z0-9]+)/);
+  let render = null;
+  for (const line of lines) {
+    render = afterWord(line, /\brender\b/, /\b(?:from|of|with)\s+(?:the\s+)?([a-z0-9]+)/);
+    if (render) break;
+  }
   if (!render) render = lower.match(/\brender\b\s+(?:a\s+specimen\s+)?(?:the\s+)?([a-z0-9]+)/);
   if (render) {
     // Title-case the captured module token to match catalog naming.
@@ -59,7 +70,7 @@ function interpret(text) {
     const mod = tok.charAt(0).toUpperCase() + tok.slice(1);
     return { action: "render_specimen", args: { module: mod } };
   }
-  if (/\bmodule\b/.test(lower)) return { action: "list_modules", args: { q: lower.replace(/.*module[s]?/, "").trim() } };
+  if (/\bmodule\b/.test(lower)) return { action: "list_modules", args: { q: lower.slice(lower.lastIndexOf("module") + (lower[lower.lastIndexOf("module") + 6] === "s" ? 7 : 6)).trim() } };
   // Default: list modules.
   return { action: "list_modules", args: {} };
 }
