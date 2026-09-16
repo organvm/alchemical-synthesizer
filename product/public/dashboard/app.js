@@ -196,7 +196,7 @@ $("#ac-newkey").onclick = async () => {
 
 function updateWho(){
   const link=$("#auth-link");
-  if(session.email){ link.textContent = session.email+" · sign out"; link.onclick=(e)=>{e.preventDefault();session.clear();$("#ac-newkey-out").textContent="";$("#ac-existing-key").value="";$("#ac-keys").textContent="";updateWho();renderAccount();refreshOverview();}; }
+  if(session.email){ link.textContent = session.email+" · sign out"; link.onclick=(e)=>{e.preventDefault();session.clear();$("#ac-msg").textContent="";$("#ac-key-msg").textContent="";$("#ac-plan").textContent="—";$("#ac-usage").textContent="—";$("#ac-newkey-out").textContent="";$("#ac-existing-key").value="";$("#ac-keys").textContent="";updateWho();renderAccount();refreshOverview();}; }
   else { link.textContent="Sign in"; link.onclick=(e)=>{e.preventDefault();showTab("account");}; }
 }
 
