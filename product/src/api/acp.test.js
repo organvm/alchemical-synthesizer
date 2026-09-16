@@ -18,6 +18,9 @@ test("ACP keeps structured directives and command precedence", () => {
     ["specimens list", "list_modules", {}],
     ["list\nspecimens", "list_modules", {}],
     ["render azoth\nrender from nebula", "render_specimen", { module: "Nebula" }],
+    ["render from\n the azoth", "render_specimen", { module: "Azoth" }],
+    ["from render of azoth", "render_specimen", { module: "Azoth" }],
+    ["module old\nmodule new", "list_modules", { q: "old\nmodule new" }],
     ["hello", "list_modules", {}]
   ];
   for (const [prompt, action, args] of cases) assert.deepEqual(interpret(prompt), { action, args }, prompt);
